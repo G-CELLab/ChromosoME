@@ -14,7 +14,7 @@ public class HandPositionLogger : MonoBehaviour
     
     [Header("Logging Settings")]
     [SerializeField] private float loggingInterval = 0.1f; // Log every 0.1 seconds
-    [SerializeField] private bool logToConsole = true;
+    [SerializeField] private bool logToConsole = false;
     [SerializeField] private bool logToCSV = true;
     
     private string csvFilePath;
@@ -31,7 +31,10 @@ public class HandPositionLogger : MonoBehaviour
 
     private void Start()
     {
-        Debug.Log("[HandPositionLogger] START called");
+        if (logToConsole)
+        {
+            Debug.Log("[HandPositionLogger] START called");
+        }
         
         if (leftHandTransform == null || rightHandTransform == null)
         {
@@ -47,8 +50,11 @@ public class HandPositionLogger : MonoBehaviour
         }
         sessionStartTime = globalSessionStartTime;
 
-        Debug.Log("[HandPositionLogger] Found Left Hand: " + leftHandTransform.name);
-        Debug.Log("[HandPositionLogger] Found Right Hand: " + rightHandTransform.name);
+        if (logToConsole)
+        {
+            Debug.Log("[HandPositionLogger] Found Left Hand: " + leftHandTransform.name);
+            Debug.Log("[HandPositionLogger] Found Right Hand: " + rightHandTransform.name);
+        }
 
         // Setup initial CSV file path
         if (logToCSV)
@@ -58,7 +64,10 @@ public class HandPositionLogger : MonoBehaviour
             InitializeCSVFile();
         }
 
-        Debug.Log("[HandPositionLogger] Initialized. Logging to: " + csvFilePath);
+        if (logToConsole)
+        {
+            Debug.Log("[HandPositionLogger] Initialized. Logging to: " + csvFilePath);
+        }
     }
 
     private void OnDisable()
@@ -80,7 +89,10 @@ public class HandPositionLogger : MonoBehaviour
             if (logToCSV)
             {
                 InitializeCSVFile();
-                Debug.Log($"[HandPositionLogger] Started new cycle {currentCycle + 1}");
+                if (logToConsole)
+                {
+                    Debug.Log($"[HandPositionLogger] Started new cycle {currentCycle + 1}");
+                }
             }
         }
         
@@ -123,7 +135,7 @@ public class HandPositionLogger : MonoBehaviour
         {
             // Create filename with cycle number (1-indexed for user readability)
             string cycleNumber = (currentCycle + 1).ToString();
-            csvFilePath = Path.Combine(Application.persistentDataPath, $"Hand_Position_Cycle{cycleNumber}.csv");
+            csvFilePath = TrialLogPath.GetFilePath($"Hand_Position_Cycle{cycleNumber}.csv");
             
             // Ensure directory exists
             string directory = Path.GetDirectoryName(csvFilePath);
@@ -169,7 +181,7 @@ public class HandPositionLogger : MonoBehaviour
     
     private Transform FindHandByName(string handName)
     {
-        Transform[] allTransforms = UnityEngine.Object.FindObjectsByType<Transform>(FindObjectsInactive.Include);
+        Transform[] allTransforms = FindObjectsByType<Transform>();
         
         // Search for exact match first
         foreach (Transform t in allTransforms)

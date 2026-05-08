@@ -8,7 +8,7 @@ using UnityEngine.XR.Interaction.Toolkit.Interactors;
 
 /// <summary>
 /// Comprehensive logging system that tracks:
-/// - Gestures (left/right grab)
+/// - Gestures (left/right pinch)
 /// - Touches (what objects hands are touching)
 /// - Info Panel state (which tutorial panel is active)
 /// - Phase changes (game phase transitions)
@@ -28,7 +28,7 @@ public class MainLogger : MonoBehaviour
     
     [Header("Logging Settings")]
     [SerializeField] private float loggingInterval = 0.1f;
-    [SerializeField] private bool logToConsole = true;
+    [SerializeField] private bool logToConsole = false;
     [SerializeField] private bool logToCSV = true;
     
     // CSV and timing
@@ -53,7 +53,7 @@ public class MainLogger : MonoBehaviour
     // Queue for user utterances sent to the AI agent.
     private Queue<string> userSpeechQueue = new Queue<string>();
 
-    // Last valid touch values used to smooth transient trigger dropouts while grabbing.
+    // Last valid touch values used to smooth transient trigger dropouts while pinching.
     private string lastStableLeftTouch = "";
     private string lastStableRightTouch = "";
     
@@ -67,7 +67,10 @@ public class MainLogger : MonoBehaviour
 
     private void Start()
     {
-        Debug.Log("[MainLogger] START called");
+        if (logToConsole)
+        {
+            Debug.Log("[MainLogger] START called");
+        }
         if (!hasGlobalSessionStartTime)
         {
             globalSessionStartTime = Time.time;
@@ -89,8 +92,11 @@ public class MainLogger : MonoBehaviour
             return;
         }
         
-        Debug.Log("[MainLogger] Found Left Hand Manager");
-        Debug.Log("[MainLogger] Found Right Hand Manager");
+        if (logToConsole)
+        {
+            Debug.Log("[MainLogger] Found Left Hand Manager");
+            Debug.Log("[MainLogger] Found Right Hand Manager");
+        }
 
         // Setup initial CSV file path
         if (logToCSV)
@@ -100,7 +106,10 @@ public class MainLogger : MonoBehaviour
             InitializeCSVFile();
         }
 
-        Debug.Log("[MainLogger] Initialized. Logging to: " + csvFilePath);
+        if (logToConsole)
+        {
+            Debug.Log("[MainLogger] Initialized. Logging to: " + csvFilePath);
+        }
     }
 
     private void OnDisable()
@@ -122,7 +131,10 @@ public class MainLogger : MonoBehaviour
             if (logToCSV)
             {
                 InitializeCSVFile();
-                Debug.Log($"[MainLogger] Started new cycle {currentCycle + 1}");
+                if (logToConsole)
+                {
+                    Debug.Log($"[MainLogger] Started new cycle {currentCycle + 1}");
+                }
             }
         }
         
@@ -173,20 +185,20 @@ public class MainLogger : MonoBehaviour
     {
         if (leftHandManager == null || !leftHandManager.isGrabbed_left)
             return "";
-        return "Left_Grab";
+        return "Left_Pinch";
     }
 
     private string GetRightGesture()
     {
         if (rightHandManager == null || !rightHandManager.isGrabbed_right)
             return "";
-        return "Right_Grab";
+        return "Right_Pinch";
     }
 
     private string GetLeftTouch()
     {
-        bool isGrabbing = leftHandManager != null && leftHandManager.isGrabbed_left;
-        if (isGrabbing)
+        bool isPinching = leftHandManager != null && leftHandManager.isGrabbed_left;
+        if (isPinching)
         {
             string selectedNutrient = GetSelectedNutrientName(leftHandManager);
             if (!string.IsNullOrEmpty(selectedNutrient))
@@ -205,10 +217,10 @@ public class MainLogger : MonoBehaviour
             return cleanedTouch;
         }
 
-        if (isGrabbing && !string.IsNullOrEmpty(lastStableLeftTouch))
+        if (isPinching && !string.IsNullOrEmpty(lastStableLeftTouch))
             return lastStableLeftTouch;
 
-        if (!isGrabbing)
+        if (!isPinching)
             lastStableLeftTouch = "";
 
         return "";
@@ -216,8 +228,8 @@ public class MainLogger : MonoBehaviour
 
     private string GetRightTouch()
     {
-        bool isGrabbing = rightHandManager != null && rightHandManager.isGrabbed_right;
-        if (isGrabbing)
+        bool isPinching = rightHandManager != null && rightHandManager.isGrabbed_right;
+        if (isPinching)
         {
             string selectedNutrient = GetSelectedNutrientName(rightHandManager);
             if (!string.IsNullOrEmpty(selectedNutrient))
@@ -236,10 +248,10 @@ public class MainLogger : MonoBehaviour
             return cleanedTouch;
         }
 
-        if (isGrabbing && !string.IsNullOrEmpty(lastStableRightTouch))
+        if (isPinching && !string.IsNullOrEmpty(lastStableRightTouch))
             return lastStableRightTouch;
 
-        if (!isGrabbing)
+        if (!isPinching)
             lastStableRightTouch = "";
 
         return "";
@@ -409,7 +421,7 @@ public class MainLogger : MonoBehaviour
         {
             // Create filename with cycle number (1-indexed for user readability)
             string cycleNumber = (currentCycle + 1).ToString();
-            csvFilePath = Path.Combine(Application.persistentDataPath, $"MainLog_Cycle{cycleNumber}.csv");
+            csvFilePath = TrialLogPath.GetFilePath($"MainLog_Cycle{cycleNumber}.csv");
             
             string directory = Path.GetDirectoryName(csvFilePath);
             if (!Directory.Exists(directory))
