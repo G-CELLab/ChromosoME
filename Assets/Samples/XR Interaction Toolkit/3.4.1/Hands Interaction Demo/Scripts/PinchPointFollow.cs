@@ -141,6 +141,14 @@ namespace UnityEngine.XR.Interaction.Toolkit.Samples.Hands
 
         public void OnJointsUpdated(XRHandJointsUpdatedEventArgs args)
         {
+            // UnityEvent persistent calls can invoke this while this component is inactive,
+            // so guard against processing before OnEnable initializes runtime state.
+            if (!isActiveAndEnabled)
+                return;
+
+            if (m_OneEuroFilterVector3 == null)
+                m_OneEuroFilterVector3 = new OneEuroFilterVector3(transform.localPosition);
+
             if (!TryGetPinchPosition(args, out var targetPos))
                 return;
 
