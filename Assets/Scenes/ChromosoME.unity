@@ -3002,12 +3002,6 @@ PrefabInstance:
     m_AddedGameObjects: []
     m_AddedComponents: []
   m_SourcePrefab: {fileID: 100100000, guid: e8eccc730fd61eb438de7f0466e0ab3f, type: 3}
---- !u!1 &249423100 stripped
-GameObject:
-  m_CorrespondingSourceObject: {fileID: 162536, guid: e8eccc730fd61eb438de7f0466e0ab3f,
-    type: 3}
-  m_PrefabInstance: {fileID: 249423099}
-  m_PrefabAsset: {fileID: 0}
 --- !u!4 &249423101 stripped
 Transform:
   m_CorrespondingSourceObject: {fileID: 451838, guid: e8eccc730fd61eb438de7f0466e0ab3f,
@@ -3623,8 +3617,11 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 7f4784d0b1cbfe545a8b06286ee3ea5b, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+<<<<<<< Updated upstream
   gameManager: {fileID: 256867758}
   target: {fileID: 1846159465}
+=======
+>>>>>>> Stashed changes
 --- !u!54 &270667790
 Rigidbody:
   m_ObjectHideFlags: 0
@@ -4086,8 +4083,11 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 0ccc645a901ace74c89d61ab62b984f0, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+<<<<<<< Updated upstream
   gameManager: {fileID: 256867758}
   particleEffect: {fileID: 1767362075}
+=======
+>>>>>>> Stashed changes
 --- !u!1 &313132148
 GameObject:
   m_ObjectHideFlags: 0
@@ -5187,7 +5187,10 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 84aa11a6abee7d4459750d346652e6a6, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+<<<<<<< Updated upstream
   gameManager: {fileID: 256867758}
+=======
+>>>>>>> Stashed changes
 --- !u!114 &438213901
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -5200,10 +5203,13 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 69070357e3200a240a9d7829571490b6, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+<<<<<<< Updated upstream
   endLocation_meta: {fileID: 483644061}
   detachable_L: {fileID: 476676898}
   detachable_R: {fileID: 672489373}
   r_renderer: {fileID: 1910879900}
+=======
+>>>>>>> Stashed changes
 --- !u!120 &438213902
 LineRenderer:
   serializedVersion: 3
@@ -5335,8 +5341,11 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 47807cea06811f74ab42bb99409f663e, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+<<<<<<< Updated upstream
   gameManager: {fileID: 256867758}
   target: {fileID: 1846159465}
+=======
+>>>>>>> Stashed changes
 --- !u!1 &439600172
 GameObject:
   m_ObjectHideFlags: 0
@@ -6102,8 +6111,11 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 7f4784d0b1cbfe545a8b06286ee3ea5b, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+<<<<<<< Updated upstream
   gameManager: {fileID: 256867758}
   target: {fileID: 1846159465}
+=======
+>>>>>>> Stashed changes
 --- !u!135 &476676902
 SphereCollider:
   m_ObjectHideFlags: 0
@@ -6164,7 +6176,10 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 03eb83f66e5e94f4a874ab365245dd22, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+<<<<<<< Updated upstream
   endLocation_ana: {fileID: 1021911700}
+=======
+>>>>>>> Stashed changes
 --- !u!1 &479976266
 GameObject:
   m_ObjectHideFlags: 0
@@ -7210,6 +7225,12 @@ MeshFilter:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 574288341}
   m_Mesh: {fileID: 10207, guid: 0000000000000000e000000000000000, type: 0}
+--- !u!95 &574854463 stripped
+Animator:
+  m_CorrespondingSourceObject: {fileID: 5866666021909216657, guid: 3c4deb7ece8db704c99aac017a61782a,
+    type: 3}
+  m_PrefabInstance: {fileID: 669022094}
+  m_PrefabAsset: {fileID: 0}
 --- !u!1 &580494945
 GameObject:
   m_ObjectHideFlags: 0
@@ -7314,6 +7335,7 @@ Canvas:
   m_SortingLayerID: 0
   m_SortingOrder: 0
   m_TargetDisplay: 0
+<<<<<<< Updated upstream
 --- !u!1 &587211001
 GameObject:
   m_ObjectHideFlags: 0
@@ -7493,6 +7515,14 @@ Canvas:
   m_SortingLayerID: 0
   m_SortingOrder: 0
   m_TargetDisplay: 0
+=======
+--- !u!4 &595920561 stripped
+Transform:
+  m_CorrespondingSourceObject: {fileID: -8679921383154817045, guid: 3c4deb7ece8db704c99aac017a61782a,
+    type: 3}
+  m_PrefabInstance: {fileID: 669022094}
+  m_PrefabAsset: {fileID: 0}
+>>>>>>> Stashed changes
 --- !u!1 &598609719
 GameObject:
   m_ObjectHideFlags: 0
@@ -7933,10 +7963,13 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 69070357e3200a240a9d7829571490b6, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+<<<<<<< Updated upstream
   endLocation_meta: {fileID: 901255438}
   detachable_L: {fileID: 0}
   detachable_R: {fileID: 0}
   r_renderer: {fileID: 0}
+=======
+>>>>>>> Stashed changes
 --- !u!65 &620147593
 BoxCollider:
   m_ObjectHideFlags: 0
@@ -8089,8 +8122,11 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 47807cea06811f74ab42bb99409f663e, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+<<<<<<< Updated upstream
   gameManager: {fileID: 256867758}
   target: {fileID: 1838294736}
+=======
+>>>>>>> Stashed changes
 --- !u!54 &620147596
 Rigidbody:
   m_ObjectHideFlags: 0
@@ -8498,10 +8534,13 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: b36e72b535c38fe40aa54613fc88fe4b, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+<<<<<<< Updated upstream
   lodingImg: {fileID: 2102122898}
   touchingTime: 3
   HPbar: {fileID: 1585911900}
   gameManager: {fileID: 256867758}
+=======
+>>>>>>> Stashed changes
 --- !u!65 &622583285
 BoxCollider:
   m_ObjectHideFlags: 0
@@ -9326,7 +9365,7 @@ PrefabInstance:
     - target: {fileID: -8679921383154817045, guid: 3c4deb7ece8db704c99aac017a61782a,
         type: 3}
       propertyPath: m_LocalPosition.x
-      value: 70.141
+      value: 70.169
       objectReference: {fileID: 0}
     - target: {fileID: -8679921383154817045, guid: 3c4deb7ece8db704c99aac017a61782a,
         type: 3}
@@ -9336,7 +9375,7 @@ PrefabInstance:
     - target: {fileID: -8679921383154817045, guid: 3c4deb7ece8db704c99aac017a61782a,
         type: 3}
       propertyPath: m_LocalPosition.z
-      value: 81.415
+      value: 80.298
       objectReference: {fileID: 0}
     - target: {fileID: -8679921383154817045, guid: 3c4deb7ece8db704c99aac017a61782a,
         type: 3}
@@ -9376,7 +9415,7 @@ PrefabInstance:
     - target: {fileID: 919132149155446097, guid: 3c4deb7ece8db704c99aac017a61782a,
         type: 3}
       propertyPath: m_Name
-      value: Carla_ARKit_Fixed
+      value: Carla
       objectReference: {fileID: 0}
     - target: {fileID: 5102164554957379762, guid: 3c4deb7ece8db704c99aac017a61782a,
         type: 3}
@@ -9400,7 +9439,11 @@ PrefabInstance:
       objectReference: {fileID: 9100000, guid: fd7aa1199b99ef04abed730a7b6f1b49, type: 2}
     m_RemovedComponents: []
     m_RemovedGameObjects: []
-    m_AddedGameObjects: []
+    m_AddedGameObjects:
+    - targetCorrespondingSourceObject: {fileID: -8679921383154817045, guid: 3c4deb7ece8db704c99aac017a61782a,
+        type: 3}
+      insertIndex: -1
+      addedObject: {fileID: 810622778}
     m_AddedComponents:
     - targetCorrespondingSourceObject: {fileID: 919132149155446097, guid: 3c4deb7ece8db704c99aac017a61782a,
         type: 3}
@@ -9410,6 +9453,34 @@ PrefabInstance:
         type: 3}
       insertIndex: -1
       addedObject: {fileID: 669022096}
+    - targetCorrespondingSourceObject: {fileID: 919132149155446097, guid: 3c4deb7ece8db704c99aac017a61782a,
+        type: 3}
+      insertIndex: -1
+      addedObject: {fileID: 669022107}
+    - targetCorrespondingSourceObject: {fileID: 919132149155446097, guid: 3c4deb7ece8db704c99aac017a61782a,
+        type: 3}
+      insertIndex: -1
+      addedObject: {fileID: 669022106}
+    - targetCorrespondingSourceObject: {fileID: 919132149155446097, guid: 3c4deb7ece8db704c99aac017a61782a,
+        type: 3}
+      insertIndex: -1
+      addedObject: {fileID: 669022105}
+    - targetCorrespondingSourceObject: {fileID: 919132149155446097, guid: 3c4deb7ece8db704c99aac017a61782a,
+        type: 3}
+      insertIndex: -1
+      addedObject: {fileID: 669022104}
+    - targetCorrespondingSourceObject: {fileID: 919132149155446097, guid: 3c4deb7ece8db704c99aac017a61782a,
+        type: 3}
+      insertIndex: -1
+      addedObject: {fileID: 669022103}
+    - targetCorrespondingSourceObject: {fileID: 919132149155446097, guid: 3c4deb7ece8db704c99aac017a61782a,
+        type: 3}
+      insertIndex: -1
+      addedObject: {fileID: 669022102}
+    - targetCorrespondingSourceObject: {fileID: 919132149155446097, guid: 3c4deb7ece8db704c99aac017a61782a,
+        type: 3}
+      insertIndex: -1
+      addedObject: {fileID: 669022101}
     - targetCorrespondingSourceObject: {fileID: 2063976763635302799, guid: 3c4deb7ece8db704c99aac017a61782a,
         type: 3}
       insertIndex: -1
@@ -9433,7 +9504,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 87560e04aa74c7a41acb9c87051c3b02, type: 3}
   m_Name: 
   m_EditorClassIdentifier: uLipSync.Runtime::uLipSync.uLipSync
-  profile: {fileID: 11400000, guid: 04d8d7db6114a384aaabeb1d02dd2013, type: 2}
+  profile: {fileID: 11400000, guid: 28fdc450a147b664ebbdb274cfd64323, type: 2}
   onLipSyncUpdate:
     m_PersistentCalls:
       m_Calls:
@@ -9450,7 +9521,7 @@ MonoBehaviour:
           m_BoolArgument: 0
         m_CallState: 2
   outputSoundGain: 1
-  audioSourceProxy: {fileID: 0}
+  audioSourceProxy: {fileID: 669022107}
 --- !u!82 &669022097
 AudioSource:
   m_ObjectHideFlags: 0
@@ -9577,33 +9648,195 @@ MonoBehaviour:
   blendShapes:
   - phoneme: A
     index: 17
-    maxWeight: 0.9
+    maxWeight: 0.4
+  - phoneme: A
+    index: 19
+    maxWeight: 0.1
   - phoneme: I
     index: 23
-    maxWeight: 0.5
+    maxWeight: 0.3
   - phoneme: I
     index: 24
-    maxWeight: 0.5
+    maxWeight: 0.3
+  - phoneme: I
+    index: 17
+    maxWeight: 0.05
   - phoneme: U
     index: 20
-    maxWeight: 0.9
+    maxWeight: 0.5
+  - phoneme: U
+    index: 17
+    maxWeight: 0.1
   - phoneme: E
     index: 17
-    maxWeight: 0.3
+    maxWeight: 0.2
   - phoneme: E
-    index: 19
-    maxWeight: 0.4
+    index: 23
+    maxWeight: 0.15
+  - phoneme: E
+    index: 24
+    maxWeight: 0.15
   - phoneme: O
     index: 19
-    maxWeight: 0.9
+    maxWeight: 0.5
   - phoneme: O
     index: 17
-    maxWeight: 0.4
+    maxWeight: 0.2
+  - phoneme: '-'
+    index: 18
+    maxWeight: 0.5
   maxBlendShapeValue: 100
   minVolume: -2.5
   maxVolume: -1.5
   smoothness: 0.05
   usePhonemeBlend: 0
+--- !u!114 &669022101
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 669022095}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: c5abc45af93303445976def6c6cebe6a, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::GestureSynchronizer
+  ttsDriver: {fileID: 669022102}
+  ttsPlayer: {fileID: 669022103}
+  gestureDefinitions:
+  - {fileID: 11400000, guid: 3269c33f7e03c594f9d3507f92280b13, type: 2}
+  charactersPerSecond: 15.3
+  maxGestureDelaySec: 10
+  maxWaitForAudioStartSec: 6
+  verboseDebug: 1
+  showTimingCalculations: 1
+--- !u!114 &669022102
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 669022095}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 864f6b3bba490ae419b35b9665ce8190, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::TTSAnimatorDriver
+  tts: {fileID: 669022103}
+  animator: {fileID: 574854463}
+  isSpeakingParam: isSpeaking
+  minRepeatTriggerIntervalSec: 0.75
+  verbose: 1
+--- !u!114 &669022103
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 669022095}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 929cded6fb6289f4884b8ee9f07317c6, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::TextToSpeechPlayer
+  logInterruptWarnings: 0
+  openAIKey: '*****'
+  ttsModel: gpt-4o-mini-tts
+  voice: nova
+  audioSource: {fileID: 669022097}
+  killAllTTSOnInterrupt: 1
+--- !u!114 &669022104
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 669022095}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: b90d053f58cd7b64d879076ca573e621, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::OpenAISpeechRecognizer
+  openAIKey: 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
+  transcriptionModel: gpt-4o-mini-transcribe
+  sampleRate: 16000
+  maxRecordTime: 30
+  minRecordTime: 0.6
+  preRollSeconds: 0.2
+  recordCooldownSec: 0.3
+  startThreshold: 0.02
+  startHoldTime: 0.15
+  stopThreshold: 0.015
+  stopSilenceTime: 0.6
+  ttsProtectionSec: 0.8
+  showDebugOverlay: 1
+  verboseDebug: 1
+  debugLogInterval: 0.25
+--- !u!114 &669022105
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 669022095}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: ec4aceca422fb4949af3120d2d06f1fa, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::AIResponseGenerator
+  openaiApiKey: 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
+  openaiModel: gpt-4o-mini
+  temperature: 0.2
+  maxTokens: 150
+  timeoutSeconds: 30
+  streamingSentences: 1
+  minCharsBeforeEarlyFire: 40
+  logRequests: 1
+  logLatency: 1
+--- !u!114 &669022106
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 669022095}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 92f32b871267e604da59a9b4825af03e, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::AITutor
+  ttsPlayer: {fileID: 669022103}
+  animatorDriver: {fileID: 669022102}
+  speechRecognizer: {fileID: 669022104}
+  gestureSynchronizer: {fileID: 669022101}
+  knowledgeBaseFolder: Scripts/AI/knowledge_base
+  ragTopK: 3
+  ragMaxContextChars: 2500
+  ragMinScore: 0.08
+  logRagRetrieval: 1
+  responseCooldownSec: 0.5
+  OnResponseStarted:
+    m_PersistentCalls:
+      m_Calls: []
+  OnResponseCompleted:
+    m_PersistentCalls:
+      m_Calls: []
+  OnErrorOccurred:
+    m_PersistentCalls:
+      m_Calls: []
+--- !u!114 &669022107
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 669022095}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 22df620edb2812f4d905e074db4b67b7, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: uLipSync.Runtime::uLipSync.uLipSyncAudioSource
 --- !u!1 &672489373
 GameObject:
   m_ObjectHideFlags: 0
@@ -9773,8 +10006,11 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 7f4784d0b1cbfe545a8b06286ee3ea5b, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+<<<<<<< Updated upstream
   gameManager: {fileID: 256867758}
   target: {fileID: 1838294736}
+=======
+>>>>>>> Stashed changes
 --- !u!135 &672489377
 SphereCollider:
   m_ObjectHideFlags: 0
@@ -9835,7 +10071,10 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 03eb83f66e5e94f4a874ab365245dd22, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+<<<<<<< Updated upstream
   endLocation_ana: {fileID: 1950033982}
+=======
+>>>>>>> Stashed changes
 --- !u!1 &675232122
 GameObject:
   m_ObjectHideFlags: 0
@@ -11978,6 +12217,133 @@ CanvasRenderer:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 809390678}
   m_CullTransparentMesh: 0
+--- !u!1 &810622777
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 810622778}
+  - component: {fileID: 810622780}
+  - component: {fileID: 810622779}
+  m_Layer: 0
+  m_Name: LightSource
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!4 &810622778
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 810622777}
+  serializedVersion: 2
+  m_LocalRotation: {x: 0.6921067, y: 0.6939883, z: -0.15246695, w: 0.12697427}
+  m_LocalPosition: {x: -0.008001614, y: 1.172, z: -0.047999892}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 595920561}
+  m_LocalEulerAnglesHint: {x: 157.20801, y: 2.1640015, z: -89.718994}
+--- !u!114 &810622779
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 810622777}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 474bcb49853aa07438625e644c072ee6, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Unity.RenderPipelines.Universal.Runtime::UnityEngine.Rendering.Universal.UniversalAdditionalLightData
+  m_UsePipelineSettings: 1
+  m_AdditionalLightsShadowResolutionTier: 2
+  m_CustomShadowLayers: 0
+  m_LightCookieSize: {x: 1, y: 1}
+  m_LightCookieOffset: {x: 0, y: 0}
+  m_SoftShadowQuality: 0
+  m_RenderingLayersMask:
+    serializedVersion: 0
+    m_Bits: 1
+  m_ShadowRenderingLayersMask:
+    serializedVersion: 0
+    m_Bits: 1
+  m_Version: 4
+  m_LightLayerMask: 1
+  m_ShadowLayerMask: 1
+  m_RenderingLayers: 1
+  m_ShadowRenderingLayers: 1
+--- !u!108 &810622780
+Light:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 810622777}
+  m_Enabled: 1
+  serializedVersion: 13
+  m_Type: 1
+  m_Color: {r: 1, g: 0.95686275, b: 0.8392157, a: 1}
+  m_Intensity: 1
+  m_Range: 10
+  m_SpotAngle: 30
+  m_InnerSpotAngle: 21.80208
+  m_CookieSize2D: {x: 0.5, y: 0.5}
+  m_Shadows:
+    m_Type: 0
+    m_Resolution: -1
+    m_CustomResolution: -1
+    m_Strength: 1
+    m_Bias: 0.02
+    m_NormalBias: 0.1
+    m_NearPlane: 0.1
+    m_CullingMatrixOverride:
+      e00: 1
+      e01: 0
+      e02: 0
+      e03: 0
+      e10: 0
+      e11: 1
+      e12: 0
+      e13: 0
+      e20: 0
+      e21: 0
+      e22: 1
+      e23: 0
+      e30: 0
+      e31: 0
+      e32: 0
+      e33: 1
+    m_UseCullingMatrixOverride: 0
+  m_Cookie: {fileID: 0}
+  m_DrawHalo: 0
+  m_Flare: {fileID: 0}
+  m_RenderMode: 0
+  m_CullingMask:
+    serializedVersion: 2
+    m_Bits: 4294967295
+  m_RenderingLayerMask: 1
+  m_Lightmapping: 4
+  m_LightShadowCasterMode: 0
+  m_AreaSize: {x: 1, y: 1}
+  m_BounceIntensity: 1
+  m_ColorTemperature: 6570
+  m_UseColorTemperature: 0
+  m_BoundingSphereOverride: {x: 0, y: 0, z: 0, w: 0}
+  m_UseBoundingSphereOverride: 0
+  m_UseViewFrustumForShadowCasterCull: 1
+  m_ForceVisible: 0
+  m_ShapeRadius: 0.025
+  m_ShadowAngle: 0
+  m_LightUnit: 1
+  m_LuxAtDistance: 1
+  m_EnableSpotReflector: 1
 --- !u!1 &819348577
 GameObject:
   m_ObjectHideFlags: 0
@@ -12938,9 +13304,12 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: e7117b83c0e0da249b8c2ebbb72bf3b8, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+<<<<<<< Updated upstream
   gameManager: {fileID: 256867758}
   text1: {fileID: 1327425036}
   text2: {fileID: 1378835269}
+=======
+>>>>>>> Stashed changes
 --- !u!114 &907394925
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -13681,8 +14050,6 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: ae8b207861a3ed844b3ac5ff7ce01820, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  player: {fileID: 0}
-  display: {fileID: 1115687396}
 --- !u!1 &955233813
 GameObject:
   m_ObjectHideFlags: 0
@@ -16264,8 +16631,11 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 7f4784d0b1cbfe545a8b06286ee3ea5b, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+<<<<<<< Updated upstream
   gameManager: {fileID: 256867758}
   target: {fileID: 1838294736}
+=======
+>>>>>>> Stashed changes
 --- !u!135 &1105086889
 SphereCollider:
   m_ObjectHideFlags: 0
@@ -16326,7 +16696,10 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 03eb83f66e5e94f4a874ab365245dd22, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+<<<<<<< Updated upstream
   endLocation_ana: {fileID: 1535050493}
+=======
+>>>>>>> Stashed changes
 --- !u!1 &1105104493
 GameObject:
   m_ObjectHideFlags: 0
@@ -17485,6 +17858,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 7a40a3a701e7d8545a304c1c246035b0, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+<<<<<<< Updated upstream
   gameManager: {fileID: 256867758}
   particleEffect: {fileID: 249423100}
   sliderImg: {fileID: 914946208}
@@ -17494,6 +17868,8 @@ MonoBehaviour:
   RightHand: {fileID: 0}
   ana: {fileID: 1881520064}
   HPbar: {fileID: 1585911900}
+=======
+>>>>>>> Stashed changes
 --- !u!114 &1168544290
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -17506,8 +17882,11 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 0ccc645a901ace74c89d61ab62b984f0, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+<<<<<<< Updated upstream
   gameManager: {fileID: 0}
   particleEffect: {fileID: 249423100}
+=======
+>>>>>>> Stashed changes
 --- !u!65 &1168544291
 BoxCollider:
   m_ObjectHideFlags: 0
@@ -18586,8 +18965,11 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 7f4784d0b1cbfe545a8b06286ee3ea5b, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+<<<<<<< Updated upstream
   gameManager: {fileID: 256867758}
   target: {fileID: 1846159465}
+=======
+>>>>>>> Stashed changes
 --- !u!135 &1308529188
 SphereCollider:
   m_ObjectHideFlags: 0
@@ -18648,7 +19030,10 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 03eb83f66e5e94f4a874ab365245dd22, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+<<<<<<< Updated upstream
   endLocation_ana: {fileID: 2090052078}
+=======
+>>>>>>> Stashed changes
 --- !u!1 &1312301425
 GameObject:
   m_ObjectHideFlags: 0
@@ -19244,10 +19629,13 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 69070357e3200a240a9d7829571490b6, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+<<<<<<< Updated upstream
   endLocation_meta: {fileID: 901255438}
   detachable_L: {fileID: 0}
   detachable_R: {fileID: 0}
   r_renderer: {fileID: 0}
+=======
+>>>>>>> Stashed changes
 --- !u!65 &1339787437
 BoxCollider:
   m_ObjectHideFlags: 0
@@ -19400,8 +19788,11 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 47807cea06811f74ab42bb99409f663e, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+<<<<<<< Updated upstream
   gameManager: {fileID: 256867758}
   target: {fileID: 1846159465}
+=======
+>>>>>>> Stashed changes
 --- !u!1 &1354891576
 GameObject:
   m_ObjectHideFlags: 0
@@ -21563,12 +21954,6 @@ PrefabInstance:
     m_AddedGameObjects: []
     m_AddedComponents: []
   m_SourcePrefab: {fileID: 100100000, guid: e8eccc730fd61eb438de7f0466e0ab3f, type: 3}
---- !u!1 &1499131625 stripped
-GameObject:
-  m_CorrespondingSourceObject: {fileID: 162536, guid: e8eccc730fd61eb438de7f0466e0ab3f,
-    type: 3}
-  m_PrefabInstance: {fileID: 1499131624}
-  m_PrefabAsset: {fileID: 0}
 --- !u!4 &1499131626 stripped
 Transform:
   m_CorrespondingSourceObject: {fileID: 451838, guid: e8eccc730fd61eb438de7f0466e0ab3f,
@@ -23631,8 +24016,11 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 13453f77e53ea194092cc74167a1857a, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+<<<<<<< Updated upstream
   gameManager: {fileID: 256867758}
   endLocation: {fileID: 1931410449}
+=======
+>>>>>>> Stashed changes
 --- !u!1 &1685185175
 GameObject:
   m_ObjectHideFlags: 0
@@ -23824,9 +24212,12 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: e7117b83c0e0da249b8c2ebbb72bf3b8, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+<<<<<<< Updated upstream
   gameManager: {fileID: 256867758}
   text1: {fileID: 1455428040}
   text2: {fileID: 1530436622}
+=======
+>>>>>>> Stashed changes
 --- !u!114 &1699398695
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -44938,12 +45329,15 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 48461a2416673ad44ade77c50d6cb89d, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+<<<<<<< Updated upstream
   endLocation: {fileID: 294935126}
   lineConnectingR: 0
   touchedR: 0
   target: {fileID: 0}
   finalTarget: {fileID: 2863107992312402339}
   hand: {fileID: 4004887928934190139}
+=======
+>>>>>>> Stashed changes
 --- !u!65 &1838294741
 BoxCollider:
   m_ObjectHideFlags: 0
@@ -45294,10 +45688,13 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 1d31b7ecd59b47e41b733dc29014df7d, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+<<<<<<< Updated upstream
   gameManager: {fileID: 256867758}
   obj: {fileID: 1838294736}
   feedback: {fileID: 1044676027}
   distanceBetweenObjects: 0
+=======
+>>>>>>> Stashed changes
 --- !u!114 &1846159470
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -45310,12 +45707,15 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: f4debfd51c8447746a08c385a641b695, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+<<<<<<< Updated upstream
   endLocation: {fileID: 601712547}
   lineConnectingL: 0
   touchedL: 0
   target: {fileID: 0}
   finalTarget: {fileID: 2101401911204292911}
   hand: {fileID: 4004887928934190139}
+=======
+>>>>>>> Stashed changes
 --- !u!65 &1846159471
 BoxCollider:
   m_ObjectHideFlags: 0
@@ -45921,6 +46321,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 195c940c1a97d6e4d9b927600c5b277c, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+<<<<<<< Updated upstream
   gameManager: {fileID: 256867758}
   particleEffect: {fileID: 1499131625}
   sliderImg: {fileID: 1751669053}
@@ -45930,6 +46331,8 @@ MonoBehaviour:
   RightHand: {fileID: 0}
   ana: {fileID: 1168544289}
   HPbar: {fileID: 1585911900}
+=======
+>>>>>>> Stashed changes
 --- !u!114 &1881520065
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -45942,8 +46345,11 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 0ccc645a901ace74c89d61ab62b984f0, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+<<<<<<< Updated upstream
   gameManager: {fileID: 0}
   particleEffect: {fileID: 1499131625}
+=======
+>>>>>>> Stashed changes
 --- !u!65 &1881520066
 BoxCollider:
   m_ObjectHideFlags: 0
@@ -46557,8 +46963,11 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 47807cea06811f74ab42bb99409f663e, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+<<<<<<< Updated upstream
   gameManager: {fileID: 256867758}
   target: {fileID: 1838294736}
+=======
+>>>>>>> Stashed changes
 --- !u!1 &1912559065
 GameObject:
   m_ObjectHideFlags: 0
@@ -47142,8 +47551,11 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 7f4784d0b1cbfe545a8b06286ee3ea5b, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+<<<<<<< Updated upstream
   gameManager: {fileID: 256867758}
   target: {fileID: 1838294736}
+=======
+>>>>>>> Stashed changes
 --- !u!54 &1947257314
 Rigidbody:
   m_ObjectHideFlags: 0
@@ -47928,7 +48340,10 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 57bd5414420ba914f935feb2cff01f46, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+<<<<<<< Updated upstream
   endLocation: {fileID: 1036041442}
+=======
+>>>>>>> Stashed changes
 --- !u!1 &2027785751
 GameObject:
   m_ObjectHideFlags: 0
@@ -49495,6 +49910,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 435e8f0431ef0cb4f9848d7ab6763378, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+<<<<<<< Updated upstream
   gameManager: {fileID: 256867758}
   Protein: {fileID: 968239669}
   Magnesium: {fileID: 789843440}
@@ -49505,6 +49921,8 @@ MonoBehaviour:
   feedback: {fileID: 1044676027}
   LeftHandManager: {fileID: 1379261224}
   RightHandManager: {fileID: 865626577}
+=======
+>>>>>>> Stashed changes
 --- !u!54 &2085467393
 Rigidbody:
   m_ObjectHideFlags: 0
@@ -49729,7 +50147,10 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 84aa11a6abee7d4459750d346652e6a6, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+<<<<<<< Updated upstream
   gameManager: {fileID: 256867758}
+=======
+>>>>>>> Stashed changes
 --- !u!114 &2086848515
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -49742,10 +50163,13 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 69070357e3200a240a9d7829571490b6, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+<<<<<<< Updated upstream
   endLocation_meta: {fileID: 901255438}
   detachable_L: {fileID: 1308529184}
   detachable_R: {fileID: 1105086885}
   r_renderer: {fileID: 2138039293}
+=======
+>>>>>>> Stashed changes
 --- !u!120 &2086848516
 LineRenderer:
   serializedVersion: 3
@@ -49877,8 +50301,11 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 47807cea06811f74ab42bb99409f663e, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+<<<<<<< Updated upstream
   gameManager: {fileID: 256867758}
   target: {fileID: 1846159465}
+=======
+>>>>>>> Stashed changes
 --- !u!1 &2090052076
 GameObject:
   m_ObjectHideFlags: 0
@@ -50533,8 +50960,11 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 47807cea06811f74ab42bb99409f663e, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+<<<<<<< Updated upstream
   gameManager: {fileID: 256867758}
   target: {fileID: 1838294736}
+=======
+>>>>>>> Stashed changes
 --- !u!1 &2139151618
 GameObject:
   m_ObjectHideFlags: 0
@@ -50920,11 +51350,14 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 6cccc5fc15ca97945835c264e6dd4caf, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::HandTriggerDetect
+<<<<<<< Updated upstream
   lodingImg: {fileID: 744149392}
   gameManager: {fileID: 256867758}
   touchingTime: 3
   UI: {fileID: 465860092}
   UIlocation: {fileID: 963651619}
+=======
+>>>>>>> Stashed changes
 --- !u!33 &1042724703030347458
 MeshFilter:
   m_ObjectHideFlags: 0
@@ -51295,10 +51728,13 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: abedd8d739e51bb448fe19d9af45fc72, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+<<<<<<< Updated upstream
   lodingImg: {fileID: 418108786}
   gameManager: {fileID: 256867758}
   touchingTime: 3
   HPbar: {fileID: 1585911900}
+=======
+>>>>>>> Stashed changes
 --- !u!65 &1987300864889553187
 BoxCollider:
   m_ObjectHideFlags: 0
@@ -53154,6 +53590,14 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 562977098698051847, guid: acb5e3d7873047647a45e0c3d003313c,
         type: 3}
+<<<<<<< Updated upstream
+=======
+      propertyPath: ttsPlayer
+      value: 
+      objectReference: {fileID: 0}
+    - target: {fileID: 562977098698051847, guid: acb5e3d7873047647a45e0c3d003313c,
+        type: 3}
+>>>>>>> Stashed changes
       propertyPath: HPsliderImg
       value: 
       objectReference: {fileID: 1585911900}
@@ -53461,7 +53905,11 @@ PrefabInstance:
         type: 3}
       propertyPath: onInterphase.m_PersistentCalls.m_Calls.Array.data[7].m_Target
       value: 
+<<<<<<< Updated upstream
       objectReference: {fileID: 465860092}
+=======
+      objectReference: {fileID: 0}
+>>>>>>> Stashed changes
     - target: {fileID: 562977098698051847, guid: acb5e3d7873047647a45e0c3d003313c,
         type: 3}
       propertyPath: onMetaphase.m_PersistentCalls.m_Calls.Array.data[10].m_Target
@@ -53728,13 +54176,6 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 41acf03f7d648c8448fe66c7a602eb97, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  L_handTouched: 0
-  R_handTouched: 0
-  LeftCentriole: {fileID: 1846159470}
-  RightCentriole: {fileID: 1838294740}
-  centro: {fileID: 0}
-  proInfo: {fileID: 1553562211}
-  metaInfo: {fileID: 1119870733}
 --- !u!1 &4013945174522715784
 GameObject:
   m_ObjectHideFlags: 0
@@ -53980,10 +54421,13 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 69070357e3200a240a9d7829571490b6, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+<<<<<<< Updated upstream
   endLocation_meta: {fileID: 483644061}
   detachable_L: {fileID: 0}
   detachable_R: {fileID: 0}
   r_renderer: {fileID: 0}
+=======
+>>>>>>> Stashed changes
 --- !u!65 &4214018763609407748
 BoxCollider:
   m_ObjectHideFlags: 0
@@ -54142,8 +54586,11 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 47807cea06811f74ab42bb99409f663e, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+<<<<<<< Updated upstream
   gameManager: {fileID: 256867758}
   target: {fileID: 1846159465}
+=======
+>>>>>>> Stashed changes
 --- !u!1 &4520946045365020495
 GameObject:
   m_ObjectHideFlags: 0
@@ -54549,10 +54996,13 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 69070357e3200a240a9d7829571490b6, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+<<<<<<< Updated upstream
   endLocation_meta: {fileID: 483644061}
   detachable_L: {fileID: 0}
   detachable_R: {fileID: 0}
   r_renderer: {fileID: 0}
+=======
+>>>>>>> Stashed changes
 --- !u!54 &7313617061543436828
 Rigidbody:
   m_ObjectHideFlags: 0
@@ -54738,8 +55188,11 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 47807cea06811f74ab42bb99409f663e, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+<<<<<<< Updated upstream
   gameManager: {fileID: 256867758}
   target: {fileID: 1838294736}
+=======
+>>>>>>> Stashed changes
 --- !u!54 &7506277574130219845
 Rigidbody:
   m_ObjectHideFlags: 0
@@ -54786,6 +55239,25 @@ GameObject:
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
   m_IsActive: 1
+<<<<<<< Updated upstream
+=======
+--- !u!114 &7563722017159985411
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 7563722017159985410}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 548877b033d90a840a4ce73b733475bc, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::WoundHealingDetector
+  gameManager: {fileID: 256867758}
+  loadingCircle:
+    duration: 3
+    image: {fileID: 0}
+>>>>>>> Stashed changes
 --- !u!4 &7844500663668381548
 Transform:
   m_ObjectHideFlags: 0
