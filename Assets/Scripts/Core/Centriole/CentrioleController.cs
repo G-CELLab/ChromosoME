@@ -2,9 +2,7 @@ using UnityEngine;
 
 /// <summary>
 /// Handles centriole movement to its pole position during Prophase.
-/// Draws a spindle fiber line once it reaches the pole and the hand touches it.
-/// Replaces LeftCentrioleMove and RightCentrioleMove.
-/// Assign Side in the inspector — Centriole1 = Left, Centriole2 = Right.
+/// Uses Rigidbody.MovePosition/MoveRotation in FixedUpdate for smooth movement.
 /// </summary>
 public class CentrioleController : MonoBehaviour, IPhaseController
 {
@@ -15,36 +13,33 @@ public class CentrioleController : MonoBehaviour, IPhaseController
 
     [Header("Movement")]
     public Transform endLocation;
+    [Tooltip("Speed the centriole moves toward its pole in meters per second.")]
+    public float moveSpeed = 0.5f;
+    [Tooltip("Speed the centriole rotates to match its pole orientation in degrees per second.")]
+    public float rotationSpeed = 2f;
+    [Tooltip("Seconds after Prophase starts before the centriole begins moving.")]
+    public float startDelay = 1.5f;
 
-    [Header("State")]
-    public bool lineConnecting = false;
-    public bool touched        = false;
-
-    [Header("Connections")]
-    [SerializeField] private GameObject target;
-    [SerializeField] private GameObject finalTarget;
-    public CentrioleTouchDetector hand;
-
-    private LineRenderer lineRenderer;
-    private float timer   = 0f;
+    private Rigidbody rb;
     private bool isActive = false;
-
-    private const float startDelay = 3f;
-    private const float maxDuration = 10f;
+    private float timer   = 0f;
 
     // ── Lifecycle ─────────────────────────────────────────────────────────────
 
     private void Start()
     {
-        lineRenderer = GetComponent<LineRenderer>();
-
-        if (GetComponent<Rigidbody>() == null)
+        rb = GetComponent<Rigidbody>();
+        if (rb == null)
         {
-            Rigidbody rb   = gameObject.AddComponent<Rigidbody>();
-            rb.isKinematic = true;
-            rb.useGravity  = false;
+            rb            = gameObject.AddComponent<Rigidbody>();
+            rb.useGravity = false;
         }
+
+        rb.isKinematic = true;
     }
+
+    private void OnEnable()  => GameManager.Register(this);
+    private void OnDisable() => GameManager.Unregister(this);
 
     // ── IPhaseController ──────────────────────────────────────────────────────
 
@@ -54,6 +49,7 @@ public class CentrioleController : MonoBehaviour, IPhaseController
         {
             isActive = true;
             timer    = 0f;
+            Debug.Log($"[CentrioleController] {side} centriole moving to pole.");
         }
     }
 
@@ -71,70 +67,39 @@ public class CentrioleController : MonoBehaviour, IPhaseController
     private void Update()
     {
         if (!isActive) return;
-
         timer += Time.deltaTime;
-
-        if (timer > startDelay && timer <= maxDuration)
-            transform.position = Vector3.Lerp(transform.position, endLocation.position, 0.01f);
-
-        DrawSpindleFiber();
     }
 
-    // ── Spindle Fiber ─────────────────────────────────────────────────────────
-
-    private void DrawSpindleFiber()
+    private void FixedUpdate()
     {
-        if (lineRenderer == null) return;
+        if (!isActive || timer < startDelay) return;
 
-        bool handTouched = side == Side.Left ? hand.leftHandTouched : hand.rightHandTouched;
+        Vector3 newPosition = Vector3.MoveTowards(
+            rb.position,
+            endLocation.position,
+            moveSpeed * Time.fixedDeltaTime
+        );
 
-        if (lineConnecting && touched && !handTouched)
-        {
-            lineRenderer.SetPosition(0, transform.position);
-            lineRenderer.SetPosition(1, target.transform.position);
-        }
-        else if (handTouched)
-        {
-            lineRenderer.SetPosition(0, transform.position);
-            lineRenderer.SetPosition(1, finalTarget.transform.position);
-        }
+        Quaternion newRotation = Quaternion.RotateTowards(
+            rb.rotation,
+            endLocation.rotation,
+            rotationSpeed * Time.fixedDeltaTime
+        );
+
+        rb.MovePosition(newPosition);
+        rb.MoveRotation(newRotation);
     }
 
     // ── Trigger Detection ─────────────────────────────────────────────────────
 
     private void OnTriggerEnter(Collider other)
     {
-        // Centriole reached its pole position
         if (other.CompareTag("Finish"))
         {
-            lineConnecting = true;
-            if (GetComponent<BoxCollider>())
-                GetComponent<BoxCollider>().enabled = true;
-        }
-
-        // Hand touches the centriole after it has reached the pole
-        if ((other.CompareTag("Left") || other.CompareTag("Right")) && lineConnecting)
-        {
-            bool alreadyTouched = side == Side.Left ? hand.leftHandTouched : hand.rightHandTouched;
-            if (alreadyTouched) return;
-
-            touched = true;
-
-            if (hand != null)
-            {
-                if (side == Side.Left) hand.leftHandTouched  = true;
-                else                   hand.rightHandTouched = true;
-            }
-
-            LogEventHelper.LogCentrioleMoved();
-
-            if (GetComponent<BoxCollider>())
-                GetComponent<BoxCollider>().enabled = false;
-
-            CapsuleCollider child = GetComponentInChildren<CapsuleCollider>();
-            if (child) child.enabled = false;
-
-            Debug.Log($"[CentrioleController] {side} centriole locked.");
+            isActive = false;
+            rb.MovePosition(endLocation.position);
+            rb.MoveRotation(endLocation.rotation);
+            Debug.Log($"[CentrioleController] {side} centriole reached pole.");
         }
     }
 }

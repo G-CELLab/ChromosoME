@@ -419,7 +419,6 @@ public class OpenAISpeechRecognizer : MonoBehaviour
         if (!verboseDebug) return;
         if (Time.realtimeSinceStartup < _nextLogTime) return;
         _nextLogTime = Time.realtimeSinceStartup + Mathf.Max(0.05f, debugLogInterval);
-        Debug.Log(msg);
     }
 
     [Serializable] private class TranscriptResponse { public string text; }

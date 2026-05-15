@@ -10,7 +10,6 @@ public class CentrioleSeparationDetector : MonoBehaviour, IPhaseController
     [Header("References")]
     public GameManager gameManager;
     public GameObject partner;
-    public GameObject feedbackObject;
 
     [Header("Runtime Info")]
     public float distanceBetweenCentrioles;
@@ -26,6 +25,9 @@ public class CentrioleSeparationDetector : MonoBehaviour, IPhaseController
     private const float feedbackDelay       = 3f;
 
     // ── IPhaseController ──────────────────────────────────────────────────────
+
+    private void OnEnable()  => GameManager.Register(this);
+    private void OnDisable() => GameManager.Unregister(this);
 
     public void OnPhaseEnter(GameManager.GameState phase)
     {
@@ -77,7 +79,6 @@ public class CentrioleSeparationDetector : MonoBehaviour, IPhaseController
         feedbackTimer += Time.deltaTime;
         if (feedbackTimer >= feedbackDelay)
         {
-            if (feedbackObject != null) feedbackObject.SetActive(true);
             feedbackShown = true;
             Debug.Log("[CentrioleSeparationDetector] Feedback shown.");
         }

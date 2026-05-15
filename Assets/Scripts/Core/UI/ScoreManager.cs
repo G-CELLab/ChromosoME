@@ -26,6 +26,9 @@ public class ScoreManager : MonoBehaviour, IPhaseController
 
     // ── IPhaseController ──────────────────────────────────────────────────────
 
+    private void OnEnable()  => GameManager.Register(this);
+    private void OnDisable() => GameManager.Unregister(this);
+
     public void OnPhaseEnter(GameManager.GameState phase)
     {
         switch (phase)

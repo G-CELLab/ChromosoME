@@ -16,7 +16,7 @@ public class SceneTransitionManager : MonoBehaviour
 
     IEnumerator GoToSceneRoutine(int sceneIndex)
     {
-        fadeScreen.FadeOut();
+        // fadeScreen.FadeOut(); // Changed method name
         yield return new WaitForSeconds(fadeScreen.fadeDuration);
 
         SceneManager.LoadScene(sceneIndex); 

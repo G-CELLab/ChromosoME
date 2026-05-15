@@ -2,32 +2,24 @@ using UnityEngine;
 
 /// <summary>
 /// Handles nutrient collection during Interphase.
-/// Player holds their hand near a nutrient for 2 seconds (without grabbing) to collect it.
-/// All three nutrients share the "Nutrient" tag — each is tracked by GameObject reference.
+/// Player places a nutrient inside the Mitochondrion trigger zone.
+/// Each nutrient collects after 2 seconds of being inside the zone.
 /// Once all 3 are collected, triggers InterphasePart2.
 /// </summary>
 public class NutrientCollisionHandler : MonoBehaviour, IPhaseController
 {
     [Header("References")]
     public GameManager gameManager;
-    public LeftHandManager leftHandManager;
-    public RightHandManager rightHandManager;
 
     [Header("Nutrients")]
     public GameObject protein;
     public GameObject magnesium;
     public GameObject vitaminC;
 
-    [Header("Scene Objects")]
-    public GameObject centriole1;
-    public GameObject centriole2;
-    private bool proteinCollected   = false;
-    private bool magnesiumCollected = false;
-    private bool vitaminCCollected  = false;
+    private bool proteinCollected         = false;
+    private bool magnesiumCollected       = false;
+    private bool vitaminCCollected        = false;
     private bool interphasePart2Triggered = false;
-
-    private bool leftHandInTrigger  = false;
-    private bool rightHandInTrigger = false;
 
     private float proteinTimer   = 0f;
     private float magnesiumTimer = 0f;
@@ -36,12 +28,30 @@ public class NutrientCollisionHandler : MonoBehaviour, IPhaseController
     private const float collectTime = 2f;
     private bool isActive = false;
 
+    // ── Lifecycle ─────────────────────────────────────────────────────────────
+
+    private void OnEnable()
+    {
+        GameManager.Register(this);
+        Debug.Log("[NutrientCollisionHandler] Registered with GameManager.");
+    }
+
+    private void OnDisable() => GameManager.Unregister(this);
+
+    private void Start()
+    {
+        if (gameManager == null)
+            gameManager = Object.FindAnyObjectByType<GameManager>();
+    }
+
     // ── IPhaseController ──────────────────────────────────────────────────────
 
     public void OnPhaseEnter(GameManager.GameState phase)
     {
+        Debug.Log($"[NutrientCollisionHandler] OnPhaseEnter: {phase}");
         if (phase == GameManager.GameState.Interphase)
             isActive = true;
+            ResetState();
     }
 
     public void OnPhaseExit(GameManager.GameState phase)
@@ -52,62 +62,50 @@ public class NutrientCollisionHandler : MonoBehaviour, IPhaseController
 
     // ── Trigger Detection ─────────────────────────────────────────────────────
 
-    private void OnTriggerEnter(Collider other)
-    {
-        if (other.CompareTag("Left"))  leftHandInTrigger  = true;
-        if (other.CompareTag("Right")) rightHandInTrigger = true;
-    }
-
-    private void OnTriggerExit(Collider other)
-    {
-        if (other.CompareTag("Left"))  leftHandInTrigger  = false;
-        if (other.CompareTag("Right")) rightHandInTrigger = false;
-    }
-
     private void OnTriggerStay(Collider other)
     {
-        if (!isActive) return;
-        if (!other.CompareTag("Nutrient")) return;
+        if (!isActive || interphasePart2Triggered) return;
 
-        bool isGrabbing = leftHandManager.isGrabbed_left || rightHandManager.isGrabbed_right;
-        bool handNearby = leftHandInTrigger || rightHandInTrigger;
-
-        // Only collect if hand is near but NOT grabbing
-        if (isGrabbing || !handNearby) return;
-
-        if (other.gameObject == protein && !proteinCollected)
+        if (MatchesNutrient(other, protein, "protein") && !proteinCollected)
         {
             proteinTimer += Time.deltaTime;
             if (proteinTimer >= collectTime)
             {
                 proteinCollected = true;
-                gameManager.FoodCollision();
-                Destroy(protein);
+                gameManager?.FoodCollision();
+                protein.SetActive(false);
                 Debug.Log("[NutrientCollisionHandler] Protein collected.");
             }
         }
-        else if (other.gameObject == magnesium && !magnesiumCollected)
+        else if (MatchesNutrient(other, magnesium, "magnesium") && !magnesiumCollected)
         {
             magnesiumTimer += Time.deltaTime;
             if (magnesiumTimer >= collectTime)
             {
                 magnesiumCollected = true;
-                gameManager.FoodCollision();
-                Destroy(magnesium);
+                gameManager?.FoodCollision();
+                magnesium.SetActive(false);
                 Debug.Log("[NutrientCollisionHandler] Magnesium collected.");
             }
         }
-        else if (other.gameObject == vitaminC && !vitaminCCollected)
+        else if (MatchesNutrient(other, vitaminC, "vitamin") && !vitaminCCollected)
         {
             vitaminCTimer += Time.deltaTime;
             if (vitaminCTimer >= collectTime)
             {
                 vitaminCCollected = true;
-                gameManager.FoodCollision();
-                Destroy(vitaminC);
+                gameManager?.FoodCollision();
+                vitaminC.SetActive(false);
                 Debug.Log("[NutrientCollisionHandler] Vitamin C collected.");
             }
         }
+    }
+
+    private void OnTriggerExit(Collider other)
+    {
+        if (MatchesNutrient(other, protein,   "protein")   && !proteinCollected)   proteinTimer   = 0f;
+        if (MatchesNutrient(other, magnesium, "magnesium") && !magnesiumCollected) magnesiumTimer = 0f;
+        if (MatchesNutrient(other, vitaminC,  "vitamin")   && !vitaminCCollected)  vitaminCTimer  = 0f;
     }
 
     // ── Update ────────────────────────────────────────────────────────────────
@@ -119,12 +117,38 @@ public class NutrientCollisionHandler : MonoBehaviour, IPhaseController
         if (proteinCollected && magnesiumCollected && vitaminCCollected)
         {
             interphasePart2Triggered = true;
-
-            if (centriole1 != null) centriole1.GetComponent<CapsuleCollider>().enabled = true;
-            if (centriole2 != null) centriole2.GetComponent<CapsuleCollider>().enabled = true;
-
-            gameManager.InterphasePart2();
+            gameManager?.InterphasePart2();
             Debug.Log("[NutrientCollisionHandler] All nutrients collected — InterphasePart2.");
         }
+    }
+
+    // ── Helpers ───────────────────────────────────────────────────────────────
+
+    private bool MatchesNutrient(Collider other, GameObject nutrient, string nutrientKey)
+    {
+        if (other == null || nutrient == null) return false;
+        if (other.gameObject == nutrient) return true;
+
+        Transform current = other.transform;
+        while (current != null)
+        {
+            if (current.gameObject == nutrient) return true;
+            if (current.name.ToLowerInvariant().Contains(nutrientKey)) return true;
+            current = current.parent;
+        }
+
+        return false;
+    }
+
+    private void ResetState()
+    {
+        proteinCollected         = false;
+        magnesiumCollected       = false;
+        vitaminCCollected        = false;
+        interphasePart2Triggered = false;
+        proteinTimer   = 0f;
+        magnesiumTimer = 0f;
+        vitaminCTimer  = 0f;
+        Debug.Log("[NutrientCollisionHandler] State reset for new Interphase.");
     }
 }

@@ -1,41 +1,72 @@
 using UnityEngine;
-
+using System.Collections.Generic;
 /// <summary>
-/// Draws a spindle fiber line from this centriole to a target chromosome.
+/// Draws spindle fiber lines from this centriole to multiple target chromosomes.
+/// Each target gets its own LineRenderer, created automatically at Start.
 /// Active during Metaphase, Anaphase, and Telophase.
-/// Replaces SpindleFiber and SpindleFiber_2 — the only difference was a
-/// small Y offset on the start position, configurable here via positionOffset.
+/// Switches to anaphase targets when Anaphase begins.
 /// </summary>
 public class SpindleFiberController : MonoBehaviour, IPhaseController
 {
     [Header("References")]
-    [SerializeField] private GameObject target;
-
+    public List<GameObject> metaphaseTargets = new List<GameObject>();
+    public List<GameObject> anaphaseTargets  = new List<GameObject>();
     [Header("Settings")]
     public Vector3 positionOffset = Vector3.zero;
+    [Header("Fiber Appearance")]
+    public Color    fiberColor    = new Color(0.7f, 1f, 0f, 1f);
+    public float    fiberWidth    = 0.015f;
+    public Material fiberMaterial;
 
-    private LineRenderer lineRenderer;
+    private List<LineRenderer> lineRenderers  = new List<LineRenderer>();
+    private List<GameObject>   activeTargets  = new List<GameObject>();
     private bool isActive = false;
 
-    private static readonly Color fiberColor = new Color(0.7f, 1f, 0f, 1f);
-    private const float fiberWidth = 0.015f;
-
+    // ── Lifecycle ─────────────────────────────────────────────────────────────
     private void Start()
     {
-        lineRenderer = GetComponent<LineRenderer>();
-        if (lineRenderer != null) lineRenderer.enabled = false;
+        // Create enough LineRenderers for whichever list is larger
+        int maxTargets = Mathf.Max(metaphaseTargets.Count, anaphaseTargets.Count);
+        for (int i = 0; i < maxTargets; i++)
+        {
+            GameObject fiberObj = new GameObject($"_SpindleFiber_{i}");
+            fiberObj.transform.SetParent(transform, false);
+            LineRenderer lr = fiberObj.AddComponent<LineRenderer>();
+            lr.positionCount = 2;
+            lr.startWidth    = fiberWidth;
+            lr.endWidth      = fiberWidth;
+            lr.material      = fiberMaterial != null
+                               ? fiberMaterial
+                               : new Material(Shader.Find("Sprites/Default"));
+            lr.material.color = fiberColor;
+            lr.useWorldSpace  = true;
+            lr.enabled        = false;
+            lineRenderers.Add(lr);
+        }
     }
 
-    // ── IPhaseController ──────────────────────────────────────────────────────
+    private void OnEnable()  => GameManager.Register(this);
+    private void OnDisable() => GameManager.Unregister(this);
 
+    // ── IPhaseController ──────────────────────────────────────────────────────
     public void OnPhaseEnter(GameManager.GameState phase)
     {
-        if (phase == GameManager.GameState.Metaphase ||
-            phase == GameManager.GameState.Anaphase  ||
-            phase == GameManager.GameState.Telophase)
+        if (phase == GameManager.GameState.Metaphase)
+        {
+            activeTargets = metaphaseTargets;
+            isActive      = true;
+            SetFibersEnabled(true);
+        }
+        else if (phase == GameManager.GameState.Anaphase)
+        {
+            activeTargets = anaphaseTargets;
+            isActive      = true;
+            SetFibersEnabled(true);
+        }
+        else if (phase == GameManager.GameState.Telophase)
         {
             isActive = true;
-            if (lineRenderer != null) lineRenderer.enabled = true;
+            SetFibersEnabled(true);
         }
     }
 
@@ -46,20 +77,33 @@ public class SpindleFiberController : MonoBehaviour, IPhaseController
             phase == GameManager.GameState.Telophase)
         {
             isActive = false;
-            if (lineRenderer != null) lineRenderer.enabled = false;
+            SetFibersEnabled(false);
         }
     }
 
     // ── Update ────────────────────────────────────────────────────────────────
-
     private void Update()
     {
-        if (!isActive || lineRenderer == null || target == null) return;
+        if (!isActive) return;
+        Vector3 startPos = transform.position + positionOffset;
+        for (int i = 0; i < lineRenderers.Count; i++)
+        {
+            if (lineRenderers[i] == null) continue;
+            if (i >= activeTargets.Count || activeTargets[i] == null)
+            {
+                lineRenderers[i].enabled = false;
+                continue;
+            }
+            lineRenderers[i].enabled = true;
+            lineRenderers[i].SetPosition(0, startPos);
+            lineRenderers[i].SetPosition(1, activeTargets[i].transform.position);
+        }
+    }
 
-        lineRenderer.material.color = fiberColor;
-        lineRenderer.startWidth     = fiberWidth;
-        lineRenderer.endWidth       = fiberWidth;
-        lineRenderer.SetPosition(0, transform.position + positionOffset);
-        lineRenderer.SetPosition(1, target.transform.position);
+    // ── Helpers ───────────────────────────────────────────────────────────────
+    private void SetFibersEnabled(bool enabled)
+    {
+        foreach (var lr in lineRenderers)
+            if (lr != null) lr.enabled = enabled;
     }
 }

@@ -1,9 +1,8 @@
 using UnityEngine;
 
 /// <summary>
-/// Moves a chromosome to its target position during Metaphase and/or Anaphase.
-/// Assign end locations in the inspector. Each phase movement is independent.
-/// Replaces ChromosomeMover and AnaphaseChromosomeMover.
+/// Moves a chromosome to its metaphase plate position when Metaphase begins.
+/// Activates chromatid objects and disables itself on completion.
 /// </summary>
 public class ChromosomeMover : MonoBehaviour, IPhaseController
 {
@@ -11,46 +10,32 @@ public class ChromosomeMover : MonoBehaviour, IPhaseController
     public Transform metaphaseEndLocation;
     public GameObject chromatidLeft;
     public GameObject chromatidRight;
-    public GameObject rightLineRenderer;
 
-    [Header("Anaphase Movement")]
-    public Transform anaphaseEndLocation;
+    private float timer   = 0f;
+    private bool isDone   = false;
+    private bool isActive = false;
 
-    private float timer    = 0f;
-    private bool isDone    = false;
-    private bool isActive  = false;
-
-    private GameManager.GameState currentPhase;
-
-    private const float startDelay      = 2f;
-    private const float metaphaseDuration = 7f;
-    private const float anaphaseDuration  = 10f;
+    private const float startDelay = 2f;
+    private const float moveSpeed  = 0.2f; // units per second — tune to match world scale
 
     // ── IPhaseController ──────────────────────────────────────────────────────
 
+    private void OnEnable()  => GameManager.Register(this);
+    private void OnDisable() => GameManager.Unregister(this);
+
     public void OnPhaseEnter(GameManager.GameState phase)
     {
-        if (phase == GameManager.GameState.Metaphase ||
-            phase == GameManager.GameState.Anaphase)
+        if (phase == GameManager.GameState.Metaphase)
         {
-            currentPhase = phase;
-            isActive     = true;
-            isDone       = false;
-            timer        = 0f;
-
-            if (phase == GameManager.GameState.Metaphase)
-            {
-                var line = GetComponent<LineRenderer>();
-                if (line != null) line.enabled = true;
-                if (rightLineRenderer != null) rightLineRenderer.SetActive(true);
-            }
+            isActive = true;
+            isDone   = false;
+            timer    = 0f;
         }
     }
 
     public void OnPhaseExit(GameManager.GameState phase)
     {
-        if (phase == GameManager.GameState.Metaphase ||
-            phase == GameManager.GameState.Anaphase)
+        if (phase == GameManager.GameState.Metaphase)
             isActive = false;
     }
 
@@ -61,41 +46,36 @@ public class ChromosomeMover : MonoBehaviour, IPhaseController
         if (!isActive || isDone) return;
 
         timer += Time.deltaTime;
+
         if (timer <= startDelay) return;
 
-        if (currentPhase == GameManager.GameState.Metaphase)
-            MoveMetaphase();
-        else if (currentPhase == GameManager.GameState.Anaphase)
-            MoveAnaphase();
+        MoveMetaphase();
     }
 
     private void MoveMetaphase()
     {
         if (metaphaseEndLocation == null) return;
 
-        transform.position = Vector3.Lerp(transform.position, metaphaseEndLocation.position, 0.01f);
+        transform.position = Vector3.MoveTowards(
+            transform.position,
+            metaphaseEndLocation.position,
+            moveSpeed * Time.deltaTime
+        );
 
-        if (timer >= metaphaseDuration)
+        if (Vector3.Distance(transform.position, metaphaseEndLocation.position) < 0.01f)
         {
-            if (chromatidLeft  != null) chromatidLeft.SetActive(true);
-            if (chromatidRight != null) chromatidRight.SetActive(true);
-            gameObject.SetActive(false);
-            isDone = true;
-            Debug.Log("[ChromosomeMover] Metaphase movement complete.");
+            transform.position = metaphaseEndLocation.position;
+            OnMovementComplete();
         }
     }
 
-    private void MoveAnaphase()
+    private void OnMovementComplete()
     {
-        if (anaphaseEndLocation == null) return;
+        if (chromatidLeft  != null) chromatidLeft.SetActive(true);
+        if (chromatidRight != null) chromatidRight.SetActive(true);
 
-        transform.position = Vector3.Lerp(transform.position, anaphaseEndLocation.position, 0.01f);
-
-        if (timer >= anaphaseDuration)
-        {
-            timer  = 0f;
-            isDone = true;
-            Debug.Log("[ChromosomeMover] Anaphase movement complete.");
-        }
+        isDone = true;
+        gameObject.SetActive(false);
+        Debug.Log("[ChromosomeMover] Metaphase movement complete.");
     }
 }

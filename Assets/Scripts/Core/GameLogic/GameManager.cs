@@ -19,8 +19,9 @@ public class GameManager : MonoBehaviour
     }
 
     public static GameState eGameStatus;
+    public static GameManager instance;
 
-    // ── Unity Events (inspector-wired scene object toggling) ──────────────────
+    // ── Unity Events ──────────────────────────────────────────────────────────
     [Header("Phase Events")]
     public UnityEvent onIntro;
     public UnityEvent onInterphase;
@@ -31,14 +32,30 @@ public class GameManager : MonoBehaviour
     public UnityEvent onTelophase;
     public UnityEvent onGameOver;
 
-    // ── Phase Controllers ─────────────────────────────────────────────────────
-    [Header("Phase Controllers")]
-    [Tooltip("Drag any MonoBehaviour that implements IPhaseController here.")]
-    [SerializeField] private List<MonoBehaviour> phaseControllers;
+    // ── Phase Controllers (auto-registered) ───────────────────────────────────
+    private readonly List<IPhaseController> phaseControllers = new List<IPhaseController>();
+
+    public static void Register(IPhaseController controller)
+    {
+        if (instance != null && !instance.phaseControllers.Contains(controller))
+        {
+            instance.phaseControllers.Add(controller);
+            controller.OnPhaseEnter(eGameStatus);
+        }
+    }
+
+    public static void Unregister(IPhaseController controller)
+    {
+        instance?.phaseControllers.Remove(controller);
+    }
 
     // ── Scene References ──────────────────────────────────────────────────────
     [Header("Scene References")]
+    [SerializeField] private AITutor aiTutor;
     public TextToSpeechPlayer ttsPlayer;
+
+    [Header("Reset Manager")]
+    [SerializeField] private ResetManager resetManager;
 
     [Header("Slider Components")]
     public Image atpSliderImg;
@@ -55,8 +72,8 @@ public class GameManager : MonoBehaviour
         Debug.Log($"[GameManager] Healing cycle: {healingCycleCount}/{MAX_HEALING_CYCLES}");
     }
 
-    public static bool IsWoundHealed()         => healingCycleCount >= MAX_HEALING_CYCLES;
-    public static int  GetHealingCycleCount()  => healingCycleCount;
+    public static bool   IsWoundHealed()       => healingCycleCount >= MAX_HEALING_CYCLES;
+    public static int    GetHealingCycleCount() => healingCycleCount;
 
     public static void ResetHealingCycles()
     {
@@ -76,27 +93,41 @@ public class GameManager : MonoBehaviour
 
     public void FoodCollision()
     {
-        LogEventHelper.LogATPCharged();
-        atpSliderImg.fillAmount += 0.3f;
+        try { LogEventHelper.LogATPCharged(); }
+        catch (System.Exception ex) { Debug.LogWarning($"[GameManager] LogEventHelper failed: {ex.Message}"); }
+
+        if (atpSliderImg != null)
+            atpSliderImg.fillAmount = Mathf.Clamp01(atpSliderImg.fillAmount + 0.3f);
+
         Debug.Log("[GameManager] ATP charged.");
     }
 
     public void CellDivided()
     {
-        hpSliderImg.fillAmount += 0.3f;
+        if (hpSliderImg != null)
+            hpSliderImg.fillAmount = Mathf.Clamp01(hpSliderImg.fillAmount + 0.3f);
+
         Debug.Log("[GameManager] HP charged.");
     }
 
     // ── Lifecycle ─────────────────────────────────────────────────────────────
 
+    private void Awake()
+    {
+        instance = this;
+    }
+
     private void Start()
     {
         Debug.Log($"[GameManager] Starting — Cycle: {healingCycleCount}/{MAX_HEALING_CYCLES}");
+        StartCoroutine(DelayedStart());
+    }
 
-        if (healingCycleCount == 0)
-            TransitionTo(GameState.Intro);
-        else
-            TransitionTo(GameState.Interphase);
+    private IEnumerator DelayedStart()
+    {
+        yield return null;
+        yield return null;
+        TransitionTo(healingCycleCount == 0 ? GameState.Intro : GameState.Interphase);
     }
 
     // ── Phase Transition Entry Points ─────────────────────────────────────────
@@ -112,18 +143,25 @@ public class GameManager : MonoBehaviour
     public void Telophase()
     {
         TransitionTo(GameState.Telophase);
-        CleanupPreviousPhases();
         StartCoroutine(DelayedTelophaseAITrigger());
+    }
+
+    // ── Next Cycle ────────────────────────────────────────────────────────────
+
+    public void ResetForNextCycle()
+    {
+        resetManager?.ResetAll();
+        Debug.Log("[GameManager] Scene reset for next cycle.");
     }
 
     // ── Core Transition Logic ─────────────────────────────────────────────────
 
     private void TransitionTo(GameState newState)
     {
-        GameState previousState = eGameStatus;
+        GameState previous = eGameStatus;
         eGameStatus = newState;
 
-        NotifyControllersExit(previousState);
+        NotifyControllersExit(previous);
         NotifyControllersEnter(newState);
 
         switch (newState)
@@ -138,80 +176,36 @@ public class GameManager : MonoBehaviour
             case GameState.GameOver:        onGameOver.Invoke();        break;
         }
 
-        NotifyAITutor();
-        Debug.Log($"[GameManager] {previousState} → {newState}");
+        aiTutor?.RefreshSceneState();
+        Debug.Log($"[GameManager] {previous} → {newState}");
     }
 
     private void NotifyControllersEnter(GameState phase)
     {
-        foreach (var mb in phaseControllers)
-            if (mb is IPhaseController controller)
-                controller.OnPhaseEnter(phase);
+        foreach (var c in new List<IPhaseController>(phaseControllers))
+            c.OnPhaseEnter(phase);
     }
 
     private void NotifyControllersExit(GameState phase)
     {
-        foreach (var mb in phaseControllers)
-            if (mb is IPhaseController controller)
-                controller.OnPhaseExit(phase);
+        foreach (var c in new List<IPhaseController>(phaseControllers))
+            c.OnPhaseExit(phase);
     }
 
     // ── AI Tutor ──────────────────────────────────────────────────────────────
-
-    private static void NotifyAITutor()
-    {
-        var tutor = Object.FindAnyObjectByType<AITutor>();
-        if (tutor != null)
-            tutor.RefreshSceneState();
-        else
-            Debug.LogWarning("[GameManager] AITutor not found — scene state not refreshed.");
-    }
 
     private IEnumerator DelayedTelophaseAITrigger()
     {
         yield return new WaitForSeconds(0.5f);
 
-        if (ttsPlayer == null)
+        if (ttsPlayer == null || aiTutor == null)
         {
-            Debug.LogWarning("[GameManager] TextToSpeechPlayer not assigned.");
+            Debug.LogWarning("[GameManager] TTS or AITutor not assigned.");
             yield break;
         }
 
-        var tutor = Object.FindAnyObjectByType<AITutor>();
-        if (tutor == null)
-        {
-            Debug.LogWarning("[GameManager] AITutor not found — cannot speak Telophase message.");
-            yield break;
-        }
-
-        string message = tutor.GetSceneState().GetTelophaseMessage();
+        string message = aiTutor.GetSceneState().GetTelophaseMessage();
         if (!string.IsNullOrEmpty(message))
             ttsPlayer.Speak(message, () => Debug.Log("[GameManager] Telophase speech done."));
-    }
-
-    // ── Cleanup ───────────────────────────────────────────────────────────────
-
-    private void CleanupPreviousPhases()
-    {
-        string[] tagsToDisable = { "Centriole1", "Centriole2", "Meta", "Pro", "Finish" };
-        foreach (string tag in tagsToDisable)
-        {
-            try
-            {
-                foreach (var obj in GameObject.FindGameObjectsWithTag(tag))
-                    obj.SetActive(false);
-            }
-            catch (UnityException)
-            {
-                Debug.Log($"[GameManager] Tag '{tag}' not defined — skipping.");
-            }
-        }
-
-        foreach (var obj in Resources.FindObjectsOfTypeAll<GameObject>())
-        {
-            if (obj.name == "Player_DNA" || obj.name == "P_Chromotid_L" || obj.name == "P_Chromotid_R")
-                if (obj.scene.name != null)
-                    obj.SetActive(false);
-        }
     }
 }
