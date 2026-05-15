@@ -1,2 +1,0 @@
-L Centromere X: -0.7 Y: 2.5 Z: 0
-R Centromere X: same but positive 0.7
