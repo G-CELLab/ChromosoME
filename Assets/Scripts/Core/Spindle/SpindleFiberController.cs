@@ -1,8 +1,9 @@
 using UnityEngine;
 using System.Collections.Generic;
+
 /// <summary>
 /// Draws spindle fiber lines from this centriole to multiple target chromosomes.
-/// Each target gets its own LineRenderer, created automatically at Start.
+/// Each target gets its own LineRenderer, created automatically.
 /// Active during Metaphase, Anaphase, and Telophase.
 /// Switches to anaphase targets when Anaphase begins.
 /// </summary>
@@ -11,33 +12,45 @@ public class SpindleFiberController : MonoBehaviour, IPhaseController
     [Header("References")]
     public List<GameObject> metaphaseTargets = new List<GameObject>();
     public List<GameObject> anaphaseTargets  = new List<GameObject>();
+
     [Header("Settings")]
     public Vector3 positionOffset = Vector3.zero;
+
     [Header("Fiber Appearance")]
     public Color    fiberColor    = new Color(0.7f, 1f, 0f, 1f);
     public float    fiberWidth    = 0.015f;
     public Material fiberMaterial;
 
-    private List<LineRenderer> lineRenderers  = new List<LineRenderer>();
-    private List<GameObject>   activeTargets  = new List<GameObject>();
+    private List<LineRenderer> lineRenderers = new List<LineRenderer>();
+    private List<GameObject>   activeTargets = new List<GameObject>();
     private bool isActive = false;
 
     // ── Lifecycle ─────────────────────────────────────────────────────────────
-    private void Start()
+    private void Awake()
     {
-        // Create enough LineRenderers for whichever list is larger
+        CreateFibers();
+    }
+
+    private void OnEnable()  => GameManager.Register(this);
+    private void OnDisable() => GameManager.Unregister(this);
+
+    // ── Fiber Creation ────────────────────────────────────────────────────────
+    private void CreateFibers()
+    {
+        lineRenderers.Clear();
+
         int maxTargets = Mathf.Max(metaphaseTargets.Count, anaphaseTargets.Count);
         for (int i = 0; i < maxTargets; i++)
         {
             GameObject fiberObj = new GameObject($"_SpindleFiber_{i}");
             fiberObj.transform.SetParent(transform, false);
             LineRenderer lr = fiberObj.AddComponent<LineRenderer>();
-            lr.positionCount = 2;
-            lr.startWidth    = fiberWidth;
-            lr.endWidth      = fiberWidth;
-            lr.material      = fiberMaterial != null
-                               ? fiberMaterial
-                               : new Material(Shader.Find("Sprites/Default"));
+            lr.positionCount  = 2;
+            lr.startWidth     = fiberWidth;
+            lr.endWidth       = fiberWidth;
+            lr.material       = fiberMaterial != null
+                                ? fiberMaterial
+                                : new Material(Shader.Find("Sprites/Default"));
             lr.material.color = fiberColor;
             lr.useWorldSpace  = true;
             lr.enabled        = false;
@@ -45,14 +58,15 @@ public class SpindleFiberController : MonoBehaviour, IPhaseController
         }
     }
 
-    private void OnEnable()  => GameManager.Register(this);
-    private void OnDisable() => GameManager.Unregister(this);
-
     // ── IPhaseController ──────────────────────────────────────────────────────
     public void OnPhaseEnter(GameManager.GameState phase)
     {
         if (phase == GameManager.GameState.Metaphase)
         {
+            // Recreate fibers if ResetManager destroyed them
+            if (lineRenderers.Count == 0 || lineRenderers[0] == null)
+                CreateFibers();
+
             activeTargets = metaphaseTargets;
             isActive      = true;
             SetFibersEnabled(true);

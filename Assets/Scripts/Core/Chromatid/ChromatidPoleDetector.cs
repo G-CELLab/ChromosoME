@@ -25,16 +25,17 @@ public class ChromatidPoleDetector : MonoBehaviour, IPhaseController
     [Header("State (Read Only)")]
     [SerializeField] private bool success = false;
 
-    private bool isActive  = false;
+    private bool isActive     = false;
     private bool isCompleting = false;
     private string chromatidTag;
     private ChromatidPoleDetector otherSide;
 
     // ── Lifecycle ─────────────────────────────────────────────────────────────
-
     private void Awake()
     {
         chromatidTag = side == Side.Left ? "Chromatid1" : "Chromatid2";
+
+        loadingCircle.Initialize();
 
         foreach (var detector in FindObjectsByType<ChromatidPoleDetector>())
         {
@@ -45,20 +46,35 @@ public class ChromatidPoleDetector : MonoBehaviour, IPhaseController
             }
         }
 
-        Debug.Assert(otherSide   != null, $"[ChromatidPoleDetector] {side}: could not find the opposite detector!", this);
-        Debug.Assert(gameManager != null, $"[ChromatidPoleDetector] {side}: gameManager is not assigned!", this);
-        Debug.Assert(loadingCircle != null, $"[ChromatidPoleDetector] {side}: loadingCircle is not assigned!", this);
+        Debug.Assert(otherSide    != null, $"[ChromatidPoleDetector] {side}: could not find the opposite detector!", this);
+        Debug.Assert(gameManager  != null, $"[ChromatidPoleDetector] {side}: gameManager is not assigned!", this);
+        Debug.Assert(loadingCircle.image != null, $"[ChromatidPoleDetector] {side}: loadingCircle is not assigned!", this);
     }
 
     private void OnEnable()  => GameManager.Register(this);
     private void OnDisable() => GameManager.Unregister(this);
 
     // ── IPhaseController ──────────────────────────────────────────────────────
-
     public void OnPhaseEnter(GameManager.GameState phase)
     {
         if (phase == GameManager.GameState.Anaphase)
-            isActive = true;
+        {
+            isActive     = true;
+            success      = false;
+            isCompleting = false;
+            loadingCircle.Reset();
+
+            // Re-enable grab on the chromatid for this side
+            // Find it by tag since we know which tag this side uses
+            var chromatids = GameObject.FindGameObjectsWithTag(chromatidTag);
+            foreach (var c in chromatids)
+            {
+                var grab = c.GetComponent<UnityEngine.XR.Interaction.Toolkit.Interactables.XRGrabInteractable>();
+                if (grab != null) grab.enabled = true;
+            }
+
+            Debug.Log($"[ChromatidPoleDetector] {side} reset for Anaphase.");
+        }
     }
 
     public void OnPhaseExit(GameManager.GameState phase)
@@ -68,7 +84,6 @@ public class ChromatidPoleDetector : MonoBehaviour, IPhaseController
     }
 
     // ── Trigger Detection ─────────────────────────────────────────────────────
-
     private void OnTriggerStay(Collider other)
     {
         if (!isActive || success || isCompleting) return;
@@ -85,7 +100,6 @@ public class ChromatidPoleDetector : MonoBehaviour, IPhaseController
     }
 
     // ── Completion ────────────────────────────────────────────────────────────
-
     private void CompleteDetection(Collider chromatidCollider)
     {
         isCompleting = true;
@@ -95,19 +109,15 @@ public class ChromatidPoleDetector : MonoBehaviour, IPhaseController
         if (checkedSprite != null)
             loadingCircle.SetSprite(checkedSprite);
 
-        // Lock the chromatid in place
         var grab = chromatidCollider.GetComponent<XRGrabInteractable>();
         if (grab != null) grab.enabled = false;
 
-        // Stop re-triggering but DON'T disable the collider —
-        // disabling it mid-stay is unreliable for OnTriggerExit across Unity versions
         var rb = chromatidCollider.GetComponent<Rigidbody>();
         if (rb != null)
         {
             if (!rb.isKinematic)
                 rb.linearVelocity = Vector3.zero;
-
-            rb.isKinematic    = true;
+            rb.isKinematic = true;
         }
 
         Debug.Log($"[ChromatidPoleDetector] {side} side complete.");

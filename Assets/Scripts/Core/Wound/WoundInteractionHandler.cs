@@ -23,12 +23,22 @@ public class WoundInteractionHandler : MonoBehaviour
     private bool isFinished = false;
     private HashSet<Collider> activeColliders = new HashSet<Collider>();
 
-    private void Start()
+    // ── Lifecycle ─────────────────────────────────────────────────────────────
+    private void Awake()
     {
+        loadingCircle.Initialize();
+    }
+
+    private void OnEnable()
+    {
+        isFinished = false;
+        activeColliders.Clear();
+        loadingCircle?.Reset();
         if (hpBar != null)
             hpBar.fillAmount = ScoreManager.HPtracking;
     }
 
+    // ── Trigger Detection ─────────────────────────────────────────────────────
     private void OnTriggerEnter(Collider other)
     {
         if (!other.CompareTag("Left") && !other.CompareTag("Right")) return;
@@ -48,6 +58,7 @@ public class WoundInteractionHandler : MonoBehaviour
         }
     }
 
+    // ── Update ────────────────────────────────────────────────────────────────
     private void Update()
     {
         if (isFinished || activeColliders.Count == 0) return;
@@ -55,31 +66,32 @@ public class WoundInteractionHandler : MonoBehaviour
             CompleteInteraction();
     }
 
+    // ── Completion ────────────────────────────────────────────────────────────
     private void CompleteInteraction()
     {
         isFinished = true;
         loadingCircle.Reset();
 
-        // End of cycle (Telophase) — increment healing and continue
         if (GameManager.eGameStatus == GameManager.GameState.Telophase)
         {
-            if (GameManager.IsWoundHealed())
+            GameManager.IncrementHealingCycle(); // increment first
+
+            if (GameManager.IsWoundHealed()) // then check
             {
                 Debug.Log("[WoundInteractionHandler] Wound fully healed — ending game.");
                 gameManager?.GameEnd();
                 return;
             }
 
-            GameManager.IncrementHealingCycle();
             ScoreManager.HPtracking = 0.3f + (GameManager.GetHealingCycleCount() * 0.3f);
             Debug.Log($"[WoundInteractionHandler] Cycle {GameManager.GetHealingCycleCount()}/{GameManager.MAX_HEALING_CYCLES} complete. HP: {ScoreManager.HPtracking}");
         }
 
-        // Both intro and end-of-cycle transition to Interphase
         Debug.Log("[WoundInteractionHandler] Transitioning to Interphase.");
         StartCoroutine(FadeAndTransition());
     }
 
+    // ── Coroutines ────────────────────────────────────────────────────────────
     private IEnumerator FadeAndTransition()
     {
         if (fadeScreen != null)
@@ -89,7 +101,5 @@ public class WoundInteractionHandler : MonoBehaviour
         if (gameManager != null) gameManager.Interphase();
 
         if (fadeScreen != null) fadeScreen.StartFadeToClear();
-
-        this.enabled = false;
     }
 }

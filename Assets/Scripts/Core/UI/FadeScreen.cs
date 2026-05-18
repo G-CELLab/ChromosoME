@@ -11,6 +11,10 @@ public class FadeScreen : MonoBehaviour
     {
         rend = GetComponent<Renderer>();
         SetAlpha(0f);
+
+        if (transform.parent != null)
+            transform.SetParent(null, true);
+
         DontDestroyOnLoad(gameObject); // survive scene reloads
     }
 

@@ -16,10 +16,18 @@ public class LoadingCircle
     public Image image;
 
     private float timer = 0f;
+    private Sprite originalSprite;
+    private Color originalColor;
 
-    /// <summary>
-    /// Advances the loading circle. Returns true once duration is reached.
-    /// </summary>
+    public void Initialize()
+    {
+        if (image != null)
+        {
+            originalSprite = image.sprite;
+            originalColor  = image.color;
+        }
+    }
+
     public bool Tick(float deltaTime)
     {
         timer += deltaTime;
@@ -28,35 +36,28 @@ public class LoadingCircle
         return timer >= duration;
     }
 
-    /// <summary>
-    /// Resets progress back to zero.
-    /// </summary>
     public void Reset()
     {
         timer = 0f;
-        if (image != null) image.fillAmount = 0f;
+        if (image != null)
+        {
+            image.fillAmount = 0f;
+            if (originalSprite != null) image.sprite = originalSprite;
+            if (originalColor != default) image.color = originalColor;
+        }
     }
 
-    /// <summary>
-    /// Fills the circle instantly and locks it at completion (e.g. success state).
-    /// </summary>
     public void Complete()
     {
         timer = duration;
         if (image != null) image.fillAmount = 1f;
     }
 
-    /// <summary>
-    /// Sets the image sprite (e.g. swap to a checkmark on success).
-    /// </summary>
     public void SetSprite(Sprite sprite)
     {
         if (image != null) image.sprite = sprite;
     }
 
-    /// <summary>
-    /// Sets the image color.
-    /// </summary>
     public void SetColor(Color color)
     {
         if (image != null) image.color = color;

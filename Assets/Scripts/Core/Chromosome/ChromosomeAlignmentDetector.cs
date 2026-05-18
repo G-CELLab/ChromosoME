@@ -24,16 +24,24 @@ public class ChromosomeAlignmentDetector : MonoBehaviour, IPhaseController
 
     private bool isActive = false;
 
-    // ── IPhaseController ──────────────────────────────────────────────────────
+    // ── Lifecycle ─────────────────────────────────────────────────────────────
+    private void Awake()
+    {
+        loadingCircle.Initialize();
+    }
+
     private void OnEnable()  => GameManager.Register(this);
     private void OnDisable() => GameManager.Unregister(this);
 
+    // ── IPhaseController ──────────────────────────────────────────────────────
     public void OnPhaseEnter(GameManager.GameState phase)
     {
         if (phase == GameManager.GameState.Metaphase)
         {
             alignmentSuccess = false;
             isActive         = false;
+            loadingCircle.Reset();
+            loadingCircle.SetVisible(false);
             StartCoroutine(ActivateAfterDelay());
         }
     }
@@ -45,8 +53,8 @@ public class ChromosomeAlignmentDetector : MonoBehaviour, IPhaseController
             StopAllCoroutines();
             isActive = false;
             if (fairyDust != null) fairyDust.SetActive(false);
-            if (!alignmentSuccess)
-                loadingCircle.Reset();
+            loadingCircle.Reset();
+            loadingCircle.SetVisible(false);
         }
     }
 
