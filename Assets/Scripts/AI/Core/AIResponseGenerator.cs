@@ -1,6 +1,9 @@
 using System;
 using System.Collections;
 using System.Collections.Generic;
+using System.Net;
+using System.Net.Security;
+using System.Security.Cryptography.X509Certificates;
 using System.Text;
 using UnityEngine;
 using UnityEngine.Networking;
@@ -30,6 +33,31 @@ public class AIResponseGenerator : MonoBehaviour
     [SerializeField] private bool logLatency  = true;
 
     private const string ENDPOINT = "https://api.openai.com/v1/chat/completions";
+
+    private static bool _sslInitialized = false;
+
+    private static void EnsureSSLInitialized()
+    {
+        if (_sslInitialized) return;
+        _sslInitialized = true;
+        
+        // Allow self-signed certificates and certificate chain issues on mobile
+        // This is necessary for some Android devices with incomplete CA certificates
+        ServicePointManager.ServerCertificateValidationCallback = 
+            (RemoteCertificateValidationCallback)Delegate.Combine(
+                ServicePointManager.ServerCertificateValidationCallback,
+                new RemoteCertificateValidationCallback(
+                    (sender, certificate, chain, sslPolicyErrors) => {
+                        // Accept all certificates for OpenAI endpoint
+                        // In production, you may want to validate specific certificates
+                        if (sender is HttpWebRequest req && 
+                            req.RequestUri.Host.Contains("openai.com"))
+                        {
+                            return true;
+                        }
+                        return sslPolicyErrors == SslPolicyErrors.None;
+                    }));
+    }
 
     private const string SYSTEM_TEMPLATE =
         "You are a friendly biology tutor inside a VR mitosis simulation for 9th-grade students. " +
@@ -71,6 +99,7 @@ public class AIResponseGenerator : MonoBehaviour
             yield break;
         }
 
+        EnsureSSLInitialized();
         string payload = BuildPayload(systemPrompt, userMessage);
         yield return RunStreamingRequest(payload, apiKey, onSentenceReady, onComplete);
 

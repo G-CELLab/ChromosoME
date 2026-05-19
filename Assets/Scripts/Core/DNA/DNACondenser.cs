@@ -6,6 +6,8 @@ public class DNACondenser : MonoBehaviour, IPhaseController
 {
     [Header("References")]
     public GameManager gameManager;
+    [SerializeField] private GameObject DNAText;
+    [SerializeField] private GameObject chromosomeText;
 
     [Header("Settings")]
     public float holdDuration = 6f;
@@ -13,7 +15,6 @@ public class DNACondenser : MonoBehaviour, IPhaseController
 
     [Header("Debug")]
     [SerializeField] private float holdTimer = 0f;
-    [SerializeField] private bool  isHeld    = false;
 
     private Animator           animator;
     private XRGrabInteractable grabInteractable;
@@ -82,9 +83,7 @@ public class DNACondenser : MonoBehaviour, IPhaseController
         delayTimer += Time.deltaTime;
         if (delayTimer < startDelay) return;
 
-        isHeld = xriHeld;
-
-        if (isHeld)
+        if (xriHeld)
             holdTimer = Mathf.Clamp(holdTimer + Time.deltaTime, 0f, holdDuration);
         else
             holdTimer = Mathf.Clamp(holdTimer - Time.deltaTime, 0f, holdDuration);
@@ -102,6 +101,10 @@ public class DNACondenser : MonoBehaviour, IPhaseController
     {
         if (isDone) return;
         isDone = true;
+
+        DNAText.SetActive(false);
+        chromosomeText.SetActive(true);
+
         if (gameManager != null) gameManager.Metaphase();
         Debug.Log("[DNACondenser] Condensed.");
     }
@@ -113,8 +116,7 @@ public class DNACondenser : MonoBehaviour, IPhaseController
         holdTimer  = 0f;
         delayTimer = 0f;
         xriHeld    = false;
-        isHeld     = false;
         if (animator != null && animator.isInitialized)
-            animator.Play("idle", 0, 0f); // lowercase to match Animator state name
+            animator.Play("idle", 0, 0f);
     }
 }

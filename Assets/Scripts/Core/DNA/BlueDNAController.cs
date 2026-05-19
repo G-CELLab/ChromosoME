@@ -2,6 +2,10 @@ using UnityEngine;
 
 public class BlueDNAController : MonoBehaviour, IPhaseController
 {
+    [Header("References")]
+    [SerializeField] private GameObject DNAText;
+    [SerializeField] private GameObject chromosomeText;
+
     [Header("Settings")]
     public float condenseDelay = 3.5f;
 
@@ -9,24 +13,39 @@ public class BlueDNAController : MonoBehaviour, IPhaseController
     private float    timer    = 0f;
     private bool     isDone   = false;
     private bool     isActive = false;
+    private bool     isInitialized = false;
 
-    private void Start()     => animator = GetComponent<Animator>();
-    private void OnEnable()  => GameManager.Register(this);
+    private void Awake()
+    {
+        animator = GetComponent<Animator>();
+    }
+
+    private void Start()
+    {
+        isInitialized = true;
+        ResetState();
+    }
+
+    private void OnEnable()
+    {
+        GameManager.Register(this);
+        if (isInitialized) ResetState();
+    }
+
     private void OnDisable() => GameManager.Unregister(this);
 
     public void OnPhaseEnter(GameManager.GameState phase)
     {
         if (phase != GameManager.GameState.Prophase) return;
+
+        ResetState();
         isActive = true;
-        isDone   = false;
-        timer    = 0f;
-        animator?.Play("idle", 0, 0f);
     }
 
     public void OnPhaseExit(GameManager.GameState phase)
     {
-        if (phase == GameManager.GameState.Prophase)
-            isActive = false;
+        if (phase == GameManager.GameState.Prophase && !isDone)
+            ResetState();
     }
 
     private void Update()
@@ -41,7 +60,19 @@ public class BlueDNAController : MonoBehaviour, IPhaseController
         if (timer >= condenseDelay)
         {
             isDone = true;
+            DNAText.SetActive(false);
+            chromosomeText.SetActive(true);
             Debug.Log("[BlueDNAController] AI DNA condensation triggered.");
         }
+    }
+
+    private void ResetState()
+    {
+        isDone   = false;
+        timer    = 0f;
+        isActive = false;
+
+        if (animator != null && animator.isInitialized)
+            animator.Play("idle", 0, 0f);
     }
 }

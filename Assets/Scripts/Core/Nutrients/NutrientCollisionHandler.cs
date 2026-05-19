@@ -50,8 +50,10 @@ public class NutrientCollisionHandler : MonoBehaviour, IPhaseController
     {
         Debug.Log($"[NutrientCollisionHandler] OnPhaseEnter: {phase}");
         if (phase == GameManager.GameState.Interphase)
+        {
             isActive = true;
             ResetState();
+        }
     }
 
     public void OnPhaseExit(GameManager.GameState phase)
@@ -149,6 +151,24 @@ public class NutrientCollisionHandler : MonoBehaviour, IPhaseController
         proteinTimer   = 0f;
         magnesiumTimer = 0f;
         vitaminCTimer  = 0f;
+        
+        // Re-enable nutrients for the new cycle
+        if (protein != null)
+        {
+            protein.SetActive(true);
+            Debug.Log("[NutrientCollisionHandler] Protein re-enabled.");
+        }
+        if (magnesium != null)
+        {
+            magnesium.SetActive(true);
+            Debug.Log("[NutrientCollisionHandler] Magnesium re-enabled.");
+        }
+        if (vitaminC != null)
+        {
+            vitaminC.SetActive(true);
+            Debug.Log("[NutrientCollisionHandler] Vitamin C re-enabled.");
+        }
+        
         Debug.Log("[NutrientCollisionHandler] State reset for new Interphase.");
     }
 }

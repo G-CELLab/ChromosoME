@@ -51,6 +51,116 @@ public static class WavUtility
         return stream.ToArray();
     }
 
+    public static AudioClip ToAudioClip(byte[] wavData)
+    {
+        if (wavData == null || wavData.Length < 44)
+        {
+            Debug.LogError("[WavUtility] WAV data is null or too short.");
+            return null;
+        }
+
+        try
+        {
+            using (var stream = new MemoryStream(wavData))
+            using (var reader = new BinaryReader(stream))
+            {
+                string riff = ReadFourCC(reader);
+                uint fileSize = reader.ReadUInt32();
+                string wave = ReadFourCC(reader);
+
+                if (riff != "RIFF" || wave != "WAVE")
+                {
+                    Debug.LogError("[WavUtility] Invalid WAV header.");
+                    return null;
+                }
+
+                ushort audioFormat = 0;
+                ushort channels = 0;
+                int sampleRate = 0;
+                ushort bitsPerSample = 0;
+                byte[] dataChunk = null;
+
+                while (reader.BaseStream.Position + 8 <= reader.BaseStream.Length)
+                {
+                    string chunkId = ReadFourCC(reader);
+                    uint chunkSize = reader.ReadUInt32();
+                    long chunkSizeLong = chunkSize;
+
+                    if (chunkId != "data" && reader.BaseStream.Position + chunkSizeLong > reader.BaseStream.Length)
+                    {
+                        Debug.LogError($"[WavUtility] Invalid WAV chunk size for chunk '{chunkId}' ({chunkSizeLong}).");
+                        return null;
+                    }
+
+                    long chunkDataStart = reader.BaseStream.Position;
+
+                    if (chunkId == "fmt ")
+                    {
+                        audioFormat = reader.ReadUInt16();
+                        channels = reader.ReadUInt16();
+                        sampleRate = reader.ReadInt32();
+                        int byteRate = reader.ReadInt32();
+                        ushort blockAlign = reader.ReadUInt16();
+                        bitsPerSample = reader.ReadUInt16();
+
+                        reader.BaseStream.Position = chunkDataStart + chunkSize;
+                    }
+                    else if (chunkId == "data")
+                    {
+                        long bytesRemaining = reader.BaseStream.Length - reader.BaseStream.Position;
+                        int dataSize = chunkSize == uint.MaxValue || chunkSizeLong > bytesRemaining
+                            ? (int)bytesRemaining
+                            : (int)chunkSizeLong;
+                        dataChunk = reader.ReadBytes(dataSize);
+                        break;
+                    }
+                    else
+                    {
+                        reader.BaseStream.Position = chunkDataStart + chunkSizeLong;
+                    }
+
+                    if ((chunkSizeLong & 1) == 1 && reader.BaseStream.Position < reader.BaseStream.Length)
+                    {
+                        reader.BaseStream.Position++;
+                    }
+                }
+
+                if (audioFormat != 1 || channels == 0 || sampleRate <= 0 || bitsPerSample != 16 || dataChunk == null || dataChunk.Length == 0)
+                {
+                    Debug.LogError("[WavUtility] Unsupported WAV format. Expected PCM 16-bit audio with data chunk.");
+                    return null;
+                }
+
+                int sampleCount = dataChunk.Length / 2;
+                float[] samples = new float[sampleCount];
+                for (int i = 0; i < sampleCount; i++)
+                {
+                    short sample = BitConverter.ToInt16(dataChunk, i * 2);
+                    samples[i] = sample / 32768f;
+                }
+
+                int frames = sampleCount / channels;
+                AudioClip clip = AudioClip.Create("wav_clip", frames, channels, sampleRate, false);
+                clip.SetData(samples, 0);
+                return clip;
+            }
+        }
+        catch (Exception ex)
+        {
+            Debug.LogError($"[WavUtility] Failed to decode WAV: {ex.Message}");
+            return null;
+        }
+    }
+
+    private static string ReadFourCC(BinaryReader reader)
+    {
+        byte[] bytes = reader.ReadBytes(4);
+        if (bytes.Length != 4)
+            throw new EndOfStreamException("Unexpected end of WAV data while reading chunk id.");
+
+        return System.Text.Encoding.ASCII.GetString(bytes);
+    }
+
     private static byte[] ConvertAudioClipDataToInt16ByteArray(float[] data)
     {
         MemoryStream dataStream = new MemoryStream();

@@ -2049,7 +2049,7 @@ MonoBehaviour:
   m_linkedTextComponent: {fileID: 0}
   parentLinkedComponent: {fileID: 0}
   m_enableKerning: 1
-  m_ActiveFontFeatures: 00000000
+  m_ActiveFontFeatures: 6e72656b
   m_enableExtraPadding: 0
   checkPaddingRequired: 0
   m_isRichText: 1
@@ -7992,10 +7992,11 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::DNACondenser
   gameManager: {fileID: 256867758}
+  DNAText: {fileID: 1639413331}
+  chromosomeText: {fileID: 1863669395}
   holdDuration: 6
   startDelay: 2
   holdTimer: 0
-  isHeld: 0
 --- !u!114 &315633185
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -8447,7 +8448,7 @@ GameObject:
   - component: {fileID: 418108787}
   - component: {fileID: 418108786}
   m_Layer: 5
-  m_Name: Image
+  m_Name: LoadingCircle
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -8739,6 +8740,8 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 4c1715d3ce969d546a88bbcca2d7b647, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::DNAController
+  DNAText: {fileID: 1455428040}
+  chromosomeText: {fileID: 1530436622}
   condenseDelay: 8
 --- !u!114 &438213904
 MonoBehaviour:
@@ -16195,7 +16198,7 @@ MonoBehaviour:
   m_linkedTextComponent: {fileID: 0}
   parentLinkedComponent: {fileID: 0}
   m_enableKerning: 1
-  m_ActiveFontFeatures: 00000000
+  m_ActiveFontFeatures: 6e72656b
   m_enableExtraPadding: 0
   checkPaddingRequired: 0
   m_isRichText: 1
@@ -17117,7 +17120,7 @@ GameObject:
   - component: {fileID: 702058587}
   - component: {fileID: 702058586}
   m_Layer: 5
-  m_Name: Canvas
+  m_Name: UI
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -17745,7 +17748,7 @@ Transform:
   serializedVersion: 2
   m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
   m_LocalPosition: {x: 0.009002686, y: -0.074939966, z: 0.035003662}
-  m_LocalScale: {x: 0.6043575, y: 0.6043575, z: 0.6043575}
+  m_LocalScale: {x: 5, y: 5, z: 5}
   m_ConstrainProportionsScale: 0
   m_Children: []
   m_Father: {fileID: 628255037}
@@ -19061,7 +19064,7 @@ MonoBehaviour:
   m_linkedTextComponent: {fileID: 0}
   parentLinkedComponent: {fileID: 0}
   m_enableKerning: 1
-  m_ActiveFontFeatures: 00000000
+  m_ActiveFontFeatures: 6e72656b
   m_enableExtraPadding: 0
   checkPaddingRequired: 0
   m_isRichText: 1
@@ -21613,8 +21616,23 @@ PrefabInstance:
     m_Modifications:
     - target: {fileID: 3945143438304162261, guid: 9319dd1df9893a34a896be432a2c5cff,
         type: 3}
+      propertyPath: m_LocalScale.x
+      value: 0.92045
+      objectReference: {fileID: 0}
+    - target: {fileID: 3945143438304162261, guid: 9319dd1df9893a34a896be432a2c5cff,
+        type: 3}
+      propertyPath: m_LocalScale.y
+      value: 0.92045
+      objectReference: {fileID: 0}
+    - target: {fileID: 3945143438304162261, guid: 9319dd1df9893a34a896be432a2c5cff,
+        type: 3}
+      propertyPath: m_LocalScale.z
+      value: 0.92045
+      objectReference: {fileID: 0}
+    - target: {fileID: 3945143438304162261, guid: 9319dd1df9893a34a896be432a2c5cff,
+        type: 3}
       propertyPath: m_LocalPosition.x
-      value: 70.21288
+      value: 71.166
       objectReference: {fileID: 0}
     - target: {fileID: 3945143438304162261, guid: 9319dd1df9893a34a896be432a2c5cff,
         type: 3}
@@ -21624,12 +21642,12 @@ PrefabInstance:
     - target: {fileID: 3945143438304162261, guid: 9319dd1df9893a34a896be432a2c5cff,
         type: 3}
       propertyPath: m_LocalPosition.z
-      value: 80.038
+      value: 80.058
       objectReference: {fileID: 0}
     - target: {fileID: 3945143438304162261, guid: 9319dd1df9893a34a896be432a2c5cff,
         type: 3}
       propertyPath: m_LocalRotation.w
-      value: -0.012673033
+      value: 0.31547424
       objectReference: {fileID: 0}
     - target: {fileID: 3945143438304162261, guid: 9319dd1df9893a34a896be432a2c5cff,
         type: 3}
@@ -21639,7 +21657,7 @@ PrefabInstance:
     - target: {fileID: 3945143438304162261, guid: 9319dd1df9893a34a896be432a2c5cff,
         type: 3}
       propertyPath: m_LocalRotation.y
-      value: -0.9999198
+      value: -0.94893414
       objectReference: {fileID: 0}
     - target: {fileID: 3945143438304162261, guid: 9319dd1df9893a34a896be432a2c5cff,
         type: 3}
@@ -21654,7 +21672,7 @@ PrefabInstance:
     - target: {fileID: 3945143438304162261, guid: 9319dd1df9893a34a896be432a2c5cff,
         type: 3}
       propertyPath: m_LocalEulerAnglesHint.y
-      value: -181.452
+      value: -143.221
       objectReference: {fileID: 0}
     - target: {fileID: 3945143438304162261, guid: 9319dd1df9893a34a896be432a2c5cff,
         type: 3}
@@ -25710,7 +25728,7 @@ MonoBehaviour:
   m_linkedTextComponent: {fileID: 0}
   parentLinkedComponent: {fileID: 0}
   m_enableKerning: 1
-  m_ActiveFontFeatures: 00000000
+  m_ActiveFontFeatures: 6e72656b
   m_enableExtraPadding: 0
   checkPaddingRequired: 0
   m_isRichText: 1
@@ -26891,6 +26909,12 @@ MeshFilter:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 1633725383}
   m_Mesh: {fileID: 10207, guid: 0000000000000000e000000000000000, type: 0}
+--- !u!1 &1639413331 stripped
+GameObject:
+  m_CorrespondingSourceObject: {fileID: 2151326631344384175, guid: 8177890d1716a84429e08d2405ce3eb9,
+    type: 3}
+  m_PrefabInstance: {fileID: 3593299230079904728}
+  m_PrefabAsset: {fileID: 0}
 --- !u!1 &1655023632
 GameObject:
   m_ObjectHideFlags: 0
@@ -33925,6 +33949,12 @@ MonoBehaviour:
   m_LimitAngularVelocity: 0
   m_MaxLinearVelocityDelta: 10
   m_MaxAngularVelocityDelta: 20
+--- !u!1 &1863669395 stripped
+GameObject:
+  m_CorrespondingSourceObject: {fileID: 3653059909664297940, guid: 8177890d1716a84429e08d2405ce3eb9,
+    type: 3}
+  m_PrefabInstance: {fileID: 3593299230079904728}
+  m_PrefabAsset: {fileID: 0}
 --- !u!1 &1864193204
 GameObject:
   m_ObjectHideFlags: 0
@@ -34797,7 +34827,6 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 1912559066}
-  - component: {fileID: 1912559067}
   m_Layer: 0
   m_Name: Interphase
   m_TagString: Untagged
@@ -34829,33 +34858,6 @@ Transform:
   - {fileID: 315633174}
   m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
---- !u!54 &1912559067
-Rigidbody:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 1912559065}
-  serializedVersion: 5
-  m_Mass: 1
-  m_LinearDamping: 0
-  m_AngularDamping: 0.05
-  m_CenterOfMass: {x: 0, y: 0, z: 0}
-  m_InertiaTensor: {x: 1, y: 1, z: 1}
-  m_InertiaRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_IncludeLayers:
-    serializedVersion: 2
-    m_Bits: 0
-  m_ExcludeLayers:
-    serializedVersion: 2
-    m_Bits: 0
-  m_ImplicitCom: 1
-  m_ImplicitTensor: 1
-  m_UseGravity: 0
-  m_IsKinematic: 1
-  m_Interpolate: 0
-  m_Constraints: 0
-  m_CollisionDetection: 0
 --- !u!1 &1927413070
 GameObject:
   m_ObjectHideFlags: 0
@@ -35289,37 +35291,6 @@ Transform:
   m_ConstrainProportionsScale: 0
   m_Children: []
   m_Father: {fileID: 82717678}
-  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
---- !u!1 &1962826232
-GameObject:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  serializedVersion: 6
-  m_Component:
-  - component: {fileID: 1962826233}
-  m_Layer: 0
-  m_Name: AttachTransform
-  m_TagString: Untagged
-  m_Icon: {fileID: 0}
-  m_NavMeshLayer: 0
-  m_StaticEditorFlags: 0
-  m_IsActive: 1
---- !u!4 &1962826233
-Transform:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 1962826232}
-  serializedVersion: 2
-  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: 0, y: 0, z: 0}
-  m_LocalScale: {x: 20, y: 20, z: 20}
-  m_ConstrainProportionsScale: 0
-  m_Children: []
-  m_Father: {fileID: 315633174}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!1 &1982885688
 GameObject:
@@ -37050,7 +37021,7 @@ MonoBehaviour:
   m_linkedTextComponent: {fileID: 0}
   parentLinkedComponent: {fileID: 0}
   m_enableKerning: 1
-  m_ActiveFontFeatures: 00000000
+  m_ActiveFontFeatures: 6e72656b
   m_enableExtraPadding: 0
   checkPaddingRequired: 0
   m_isRichText: 1
@@ -37440,6 +37411,8 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 4c1715d3ce969d546a88bbcca2d7b647, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::DNAController
+  DNAText: {fileID: 1327425036}
+  chromosomeText: {fileID: 1378835269}
   condenseDelay: 8
 --- !u!114 &2086848519
 MonoBehaviour:
@@ -39556,6 +39529,11 @@ PrefabInstance:
       propertyPath: m_Layer
       value: 0
       objectReference: {fileID: 0}
+    - target: {fileID: 2324290801231168993, guid: 8177890d1716a84429e08d2405ce3eb9,
+        type: 3}
+      propertyPath: 'm_ActiveFontFeatures.Array.data[0]'
+      value: 1801810542
+      objectReference: {fileID: 0}
     - target: {fileID: 2516947194938663752, guid: 8177890d1716a84429e08d2405ce3eb9,
         type: 3}
       propertyPath: m_LocalPosition.x
@@ -39625,6 +39603,16 @@ PrefabInstance:
         type: 3}
       propertyPath: m_Layer
       value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 3653059909664297940, guid: 8177890d1716a84429e08d2405ce3eb9,
+        type: 3}
+      propertyPath: m_IsActive
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 4468106234786055669, guid: 8177890d1716a84429e08d2405ce3eb9,
+        type: 3}
+      propertyPath: m_Name
+      value: Border
       objectReference: {fileID: 0}
     - target: {fileID: 4468106234786055669, guid: 8177890d1716a84429e08d2405ce3eb9,
         type: 3}
@@ -40104,10 +40092,6 @@ PrefabInstance:
         type: 3}
       insertIndex: 4
       addedObject: {fileID: 488239363}
-    - targetCorrespondingSourceObject: {fileID: 2516947194938663752, guid: 8177890d1716a84429e08d2405ce3eb9,
-        type: 3}
-      insertIndex: -1
-      addedObject: {fileID: 1962826233}
     m_AddedComponents:
     - targetCorrespondingSourceObject: {fileID: 3001137397330901490, guid: 8177890d1716a84429e08d2405ce3eb9,
         type: 3}
@@ -40270,7 +40254,7 @@ PrefabInstance:
     - target: {fileID: 562977098698051847, guid: acb5e3d7873047647a45e0c3d003313c,
         type: 3}
       propertyPath: onInterphase.m_PersistentCalls.m_Calls.Array.size
-      value: 8
+      value: 9
       objectReference: {fileID: 0}
     - target: {fileID: 562977098698051847, guid: acb5e3d7873047647a45e0c3d003313c,
         type: 3}
@@ -40676,7 +40660,7 @@ PrefabInstance:
         type: 3}
       propertyPath: onInterphase.m_PersistentCalls.m_Calls.Array.data[8].m_Target
       value: 
-      objectReference: {fileID: 0}
+      objectReference: {fileID: 315633179}
     - target: {fileID: 562977098698051847, guid: acb5e3d7873047647a45e0c3d003313c,
         type: 3}
       propertyPath: onInterphase.m_PersistentCalls.m_Calls.Array.data[9].m_Target
@@ -40965,7 +40949,7 @@ PrefabInstance:
     - target: {fileID: 562977098698051847, guid: acb5e3d7873047647a45e0c3d003313c,
         type: 3}
       propertyPath: onInterphase.m_PersistentCalls.m_Calls.Array.data[8].m_MethodName
-      value: SetActive
+      value: set_enabled
       objectReference: {fileID: 0}
     - target: {fileID: 562977098698051847, guid: acb5e3d7873047647a45e0c3d003313c,
         type: 3}
@@ -41192,6 +41176,12 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 562977098698051847, guid: acb5e3d7873047647a45e0c3d003313c,
         type: 3}
+      propertyPath: onInterphase.m_PersistentCalls.m_Calls.Array.data[8].m_TargetAssemblyTypeName
+      value: UnityEngine.XR.Interaction.Toolkit.Interactables.XRGrabInteractable,
+        Unity.XR.Interaction.Toolkit
+      objectReference: {fileID: 0}
+    - target: {fileID: 562977098698051847, guid: acb5e3d7873047647a45e0c3d003313c,
+        type: 3}
       propertyPath: onMetaphase.m_PersistentCalls.m_Calls.Array.data[11].m_TargetAssemblyTypeName
       value: 
       objectReference: {fileID: 0}
@@ -41328,7 +41318,7 @@ PrefabInstance:
     - target: {fileID: 562977098698051847, guid: acb5e3d7873047647a45e0c3d003313c,
         type: 3}
       propertyPath: onInterphase.m_PersistentCalls.m_Calls.Array.data[8].m_Arguments.m_BoolArgument
-      value: 1
+      value: 0
       objectReference: {fileID: 0}
     - target: {fileID: 562977098698051847, guid: acb5e3d7873047647a45e0c3d003313c,
         type: 3}
@@ -41999,7 +41989,7 @@ GameObject:
   - component: {fileID: 3734830155162807726}
   - component: {fileID: 2158196303243725207}
   m_Layer: 0
-  m_Name: object_1
+  m_Name: Arm
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0

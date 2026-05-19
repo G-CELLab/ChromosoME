@@ -28,7 +28,7 @@ public class TextToSpeechPlayer : MonoBehaviour
     // Rotating filename counter so concurrent prefetch requests never overwrite each other
     private static int _fetchCounter = 0;
     private static string NextFetchPath() =>
-        TrialLogPath.GetFilePath($"tts_prefetch_{(_fetchCounter++ % 8)}.mp3");
+        TrialLogPath.GetFilePath($"tts_prefetch_{(_fetchCounter++ % 8)}.wav");
 
     public static void KillAllTTS()
     {
@@ -179,7 +179,7 @@ public class TextToSpeechPlayer : MonoBehaviour
             model           = string.IsNullOrWhiteSpace(ttsModel) ? "gpt-4o-mini-tts" : ttsModel,
             input           = text,
             voice           = voice,
-            response_format = "mp3"
+            response_format = "wav"
         });
 
         var req = new UnityWebRequest("https://api.openai.com/v1/audio/speech", "POST");
@@ -203,29 +203,18 @@ public class TextToSpeechPlayer : MonoBehaviour
             yield break;
         }
 
-        string path = NextFetchPath();
-        try { File.WriteAllBytes(path, req.downloadHandler.data); }
-        catch (Exception e)
+        byte[] wavData = req.downloadHandler.data;
+        AudioClip clip = WavUtility.ToAudioClip(wavData);
+        if (clip == null)
         {
-            Debug.LogError("[TTS] Write failed: " + e.Message);
+            Debug.LogError("[TTS] Failed to decode WAV from bytes");
             onReady?.Invoke(null);
             yield break;
         }
 
-        Debug.Log($"[TTS] Saved {req.downloadHandler.data.Length} bytes -> {path}");
+        Debug.Log($"[TTS] Decoded {wavData.Length} bytes in memory");
         Debug.Log($"[TTS] Speaking: {text}");
-
-        using (var www = UnityWebRequestMultimedia.GetAudioClip("file://" + path, AudioType.MPEG))
-        {
-            yield return www.SendWebRequest();
-#if UNITY_2020_2_OR_NEWER
-            bool ok2 = www.result == UnityWebRequest.Result.Success;
-#else
-            bool ok2 = !www.isNetworkError && !www.isHttpError;
-#endif
-            if (!ok2) { Debug.LogError("[TTS] Load MP3 failed: " + www.error); onReady?.Invoke(null); yield break; }
-            onReady?.Invoke(DownloadHandlerAudioClip.GetContent(www));
-        }
+        onReady?.Invoke(clip);
     }
 
     // ── PlayClip: play a pre-fetched clip (used by AITutor prefetch queue) ────

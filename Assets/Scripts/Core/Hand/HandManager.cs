@@ -150,10 +150,16 @@ public class HandManager : MonoBehaviour, IPhaseController
         if (handInteractor == null || !handInteractor.enabled || !handInteractor.gameObject.activeInHierarchy)
             return;
 
+        if (!active)
+        {
+            ForceRelease();
+            return;
+        }
+
         if (isManualSelecting && !HasCurrentSelection())
             isManualSelecting = false;
 
-        if (active && !isManualSelecting)
+        if (!isManualSelecting)
         {
             var targets = handInteractor.interactablesHovered;
             if (targets != null && targets.Count > 0)
@@ -165,10 +171,6 @@ public class HandManager : MonoBehaviour, IPhaseController
                     isManualSelecting = true;
                 }
             }
-        }
-        else if (!active && isManualSelecting)
-        {
-            ForceRelease();
         }
     }
 
