@@ -302,7 +302,7 @@ public class AITutor : MonoBehaviour
                     float remaining = ttsPlayer.audioSource.clip != null
                         ? ttsPlayer.audioSource.clip.length - ttsPlayer.audioSource.time
                         : 0f;
-                    if (elapsed > 0.3f && remaining < 0.10f) break;
+                    if (elapsed > 0.3f && remaining < 0.12f) break;
                 }
 
                 if (Time.realtimeSinceStartup - playStart > 30f)

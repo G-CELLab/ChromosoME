@@ -6,7 +6,7 @@ using UnityEngine.UI;
 /// </summary>
 public class ScoreManager : MonoBehaviour, IPhaseController
 {
-    public static float HPtracking = 0.3f;
+    public static float HPtracking = 0.1f;
 
     [Header("References")]
     public Image hpBar;

@@ -7,7 +7,7 @@ public class BlueDNAController : MonoBehaviour, IPhaseController
     [SerializeField] private GameObject chromosomeText;
 
     [Header("Settings")]
-    public float condenseDelay = 3.5f;
+    public float condenseDelay = 5.9f;
 
     private Animator animator;
     private float    timer    = 0f;
