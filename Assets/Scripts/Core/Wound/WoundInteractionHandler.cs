@@ -83,7 +83,7 @@ public class WoundInteractionHandler : MonoBehaviour
                 return;
             }
 
-            ScoreManager.HPtracking = 0.3f + (GameManager.GetHealingCycleCount() * 0.3f);
+            
             Debug.Log($"[WoundInteractionHandler] Cycle {GameManager.GetHealingCycleCount()}/{GameManager.MAX_HEALING_CYCLES} complete. HP: {ScoreManager.HPtracking}");
         }
 
