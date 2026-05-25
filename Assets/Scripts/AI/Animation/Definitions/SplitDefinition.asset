@@ -10,28 +10,20 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 6834597e7f8c9d945966ce6e63fa4937, type: 3}
-  m_Name: LineUpDefinition
+  m_Name: SplitDefinition
   m_EditorClassIdentifier: Assembly-CSharp::GestureDefinition
-  gestureName: Line Up (Legacy)
-  animatorTriggerName: Line Up (Legacy)
+  gestureName: Splitting (Legacy)
+  animatorTriggerName: Splitting (Legacy)
   keywords:
-  - line up
-  - align
-  - in a row
-  - lined up
-  - lines up
-  - lining up
-  - lining them up
-  - line them up
-  - all line up
-  - all lined up
-  - center
-  - in a row
-  - middle
-  - line it up
-  - lines up
-  - lined up
-  - line the chromosome
+  - split
+  - into two
+  - pull each half
+  - two halves
+  - seperate
+  - opposite
+  - 'pull to '
+  - go to
+  - apart
   timeScale: 1
   advanceSeconds: 0
   fallbackDelaySeconds: 2

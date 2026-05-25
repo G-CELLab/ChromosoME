@@ -10,28 +10,16 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 6834597e7f8c9d945966ce6e63fa4937, type: 3}
-  m_Name: LineUpDefinition
+  m_Name: EatDefinition
   m_EditorClassIdentifier: Assembly-CSharp::GestureDefinition
-  gestureName: Line Up (Legacy)
-  animatorTriggerName: Line Up (Legacy)
+  gestureName: Eating (Legacy)
+  animatorTriggerName: Eating (Legacy)
   keywords:
-  - line up
-  - align
-  - in a row
-  - lined up
-  - lines up
-  - lining up
-  - lining them up
-  - line them up
-  - all line up
-  - all lined up
-  - center
-  - in a row
-  - middle
-  - line it up
-  - lines up
-  - lined up
-  - line the chromosome
+  - eating
+  - eat
+  - food
+  - eats
+  - energy
   timeScale: 1
   advanceSeconds: 0
   fallbackDelaySeconds: 2
