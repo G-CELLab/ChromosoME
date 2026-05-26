@@ -19,21 +19,18 @@ public class TextToSpeechPlayer : MonoBehaviour
 
     [TextArea(3, 6)]
     public string ttsInstructions = "Speak in a warm, friendly, consistent tone. " +
-                                "Maintain a moderate and steady pitch throughout. " +
-                                "Keep energy level calm and even. ";
+                                    "Maintain a moderate and steady pitch throughout. " +
+                                    "Keep energy level calm and even. ";
 
     [Header("Audio")]
     public AudioSource audioSource;
+
+    [Tooltip("When interrupted, stop all TTS instances (true) or just this one (false).")]
     public bool killAllTTSOnInterrupt = true;
 
     // ── Static registry ───────────────────────────────────────────────────────
 
     private static readonly HashSet<TextToSpeechPlayer> INSTANCES = new HashSet<TextToSpeechPlayer>();
-
-    // Rotating filename counter so concurrent prefetch requests never overwrite each other
-    private static int _fetchCounter = 0;
-    private static string NextFetchPath() =>
-        TrialLogPath.GetFilePath($"tts_prefetch_{(_fetchCounter++ % 8)}.wav");
 
     public static void KillAllTTS()
     {
@@ -90,7 +87,6 @@ public class TextToSpeechPlayer : MonoBehaviour
     {
         while (true)
         {
-            // Heartbeat — extend if you need per-frame IsSpeaking diagnostics
             yield return new WaitForSeconds(0.1f);
         }
     }
@@ -185,7 +181,7 @@ public class TextToSpeechPlayer : MonoBehaviour
             input           = text,
             voice           = voice,
             response_format = "wav",
-            instructions     = ttsInstructions
+            instructions    = ttsInstructions
         });
 
         var req = new UnityWebRequest("https://api.openai.com/v1/audio/speech", "POST");
@@ -267,7 +263,7 @@ public class TextToSpeechPlayer : MonoBehaviour
             }
             yield return null;
         }
-        
+
         Debug.Log("[TTS] PlayClip done, invoking onDone callback.");
         onDone?.Invoke();
     }

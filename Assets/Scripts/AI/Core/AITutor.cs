@@ -15,6 +15,12 @@ using UnityEngine.Events;
 ///     → AIResponseGenerator.GenerateStreamingResponse()
 ///         → per sentence: EnqueueTTS() → PrefetchNext() → DrainTTSQueue()
 ///     → GestureSynchronizer.ProcessResponse() (keyword-driven, no fallback)
+///
+/// Interruption:
+///   A new transcript while _isProcessing calls Interrupt(), which sets
+///   _interrupted = true and stops TTS audio immediately. All coroutines
+///   check _interrupted and exit early. The processing gate is released in
+///   the finally block, then the new query starts normally.
 /// </summary>
 [RequireComponent(typeof(AIResponseGenerator))]
 [AddComponentMenu("AI/AI Tutor")]
@@ -40,6 +46,9 @@ public class AITutor : MonoBehaviour
     [Tooltip("Cooldown after a response completes before accepting the next transcript (seconds)")]
     [SerializeField] private float responseCooldownSec = 0.5f;
 
+    [Tooltip("How long to wait for the interrupted coroutine to release the gate before forcing a new query (seconds)")]
+    [SerializeField] private float interruptTimeoutSec = 1.5f;
+
     [Header("Events")]
     public UnityEvent<string> OnResponseStarted   = new UnityEvent<string>();
     public UnityEvent<string> OnResponseCompleted = new UnityEvent<string>();
@@ -52,6 +61,7 @@ public class AITutor : MonoBehaviour
     private TutorSceneState     _sceneState;
 
     private bool  _isProcessing   = false;
+    private bool  _interrupted    = false;
     private float _lastResponseAt = -999f;
 
     private bool _ttsBusy          = false;
@@ -108,7 +118,9 @@ public class AITutor : MonoBehaviour
 
         if (_isProcessing)
         {
-            Debug.LogWarning("[AITutor] Already processing — query ignored.");
+            // Interrupt the current response and start the new query
+            Debug.Log("[AITutor] Interrupting current response for new query.");
+            StartCoroutine(InterruptThenQuery(query));
             return;
         }
 
@@ -123,6 +135,32 @@ public class AITutor : MonoBehaviour
 
     public bool IsProcessing => _isProcessing;
 
+    /// <summary>
+    /// Immediately stops TTS playback and signals all coroutines to exit.
+    /// Respects killAllTTSOnInterrupt on the TTS player.
+    /// The processing gate is released by the finally block in RunQueryCoroutine.
+    /// </summary>
+    public void Interrupt()
+    {
+        if (!_isProcessing) return;
+
+        Debug.Log("[AITutor] 🛑 Interrupt called.");
+        _interrupted = true;
+
+        // Stop audio — respect the killAllTTSOnInterrupt toggle
+        if (ttsPlayer != null)
+        {
+            if (ttsPlayer.killAllTTSOnInterrupt)
+                TextToSpeechPlayer.KillAllTTS();
+            else
+                ttsPlayer.StopSpeaking();
+        }
+
+        // Clear the clip queue so DrainTTSQueue exits on its next iteration
+        _orderedClipQueue.Clear();
+        _ttsBusy = false;
+    }
+
     // ── Internal ──────────────────────────────────────────────────────────────
 
     private void OnTranscriptReceived(string transcript)
@@ -132,9 +170,36 @@ public class AITutor : MonoBehaviour
         ProcessUserQuery(transcript);
     }
 
+    /// <summary>
+    /// Interrupts the current response, waits for the gate to release,
+    /// then starts the new query.
+    /// </summary>
+    private IEnumerator InterruptThenQuery(string query)
+    {
+        Interrupt();
+
+        // Wait for the processing gate to release (finally block in RunQueryCoroutine)
+        float timeout = Time.realtimeSinceStartup + interruptTimeoutSec;
+        while (_isProcessing && Time.realtimeSinceStartup < timeout)
+            yield return null;
+
+        if (_isProcessing)
+        {
+            Debug.LogWarning("[AITutor] Interrupt timeout — forcing gate release.");
+            _isProcessing = false;
+        }
+
+        // Brief pause so the animator can settle before the new thinking gesture
+        yield return new WaitForSecondsRealtime(0.1f);
+
+        Debug.Log($"[AITutor] Starting new query after interrupt: {query}");
+        StartCoroutine(RunQueryCoroutine(query));
+    }
+
     private IEnumerator RunQueryCoroutine(string query)
     {
         _isProcessing = true;
+        _interrupted  = false;
         string fullResponse = "";
         bool   ttsCompleted = false;
 
@@ -173,6 +238,8 @@ public class AITutor : MonoBehaviour
                 _sceneState,
                 onSentenceReady: sentence =>
                 {
+                    if (_interrupted) return;
+
                     animatorDriver?.CancelThinking();
                     EnqueueTTS(sentence);
                     fullResponse += (fullResponse.Length > 0 ? " " : "") + sentence;
@@ -182,6 +249,8 @@ public class AITutor : MonoBehaviour
                 },
                 onComplete: full =>
                 {
+                    if (_interrupted) return;
+
                     if (string.IsNullOrWhiteSpace(fullResponse))
                         fullResponse = full;
 
@@ -190,15 +259,21 @@ public class AITutor : MonoBehaviour
                 }
             );
 
-            // 4. Wait for TTS to finish
-            float ttsTimeout = Time.realtimeSinceStartup + 30f;
-            while (_ttsBusy && Time.realtimeSinceStartup < ttsTimeout)
-                yield return null;
+            // 4. Wait for TTS to finish (skipped if interrupted)
+            if (!_interrupted)
+            {
+                float ttsTimeout = Time.realtimeSinceStartup + 30f;
+                while (_ttsBusy && Time.realtimeSinceStartup < ttsTimeout)
+                {
+                    if (_interrupted) break;
+                    yield return null;
+                }
 
-            if (_ttsBusy)
-                Debug.LogWarning("[AITutor] TTS drain timed out after 30s.");
+                if (_ttsBusy && !_interrupted)
+                    Debug.LogWarning("[AITutor] TTS drain timed out after 30s.");
+            }
 
-            ttsCompleted = true;
+            ttsCompleted = !_interrupted;
         }
         finally
         {
@@ -209,7 +284,11 @@ public class AITutor : MonoBehaviour
             _playbackOrder    = 0;
             _orderedClipQueue.Clear();
             _lastResponseAt   = Time.realtimeSinceStartup;
-            Debug.Log("[AITutor] Processing gate released.");
+
+            if (_interrupted)
+                Debug.Log("[AITutor] Response interrupted — gate released.");
+            else
+                Debug.Log("[AITutor] Processing gate released.");
         }
 
         if (ttsCompleted)
@@ -225,6 +304,8 @@ public class AITutor : MonoBehaviour
     private void EnqueueTTS(string sentence)
     {
         if (string.IsNullOrWhiteSpace(sentence)) return;
+        if (_interrupted) return;
+
         int order = _enqueueOrder++;
         StartCoroutine(PrefetchNext(sentence, order));
         if (!_ttsBusy)
@@ -245,7 +326,10 @@ public class AITutor : MonoBehaviour
         AudioClip clip = null;
         yield return ttsPlayer.FetchAudioClip(sentence, c => clip = c);
         _prefetchInFlight--;
-        _orderedClipQueue[order] = clip;
+
+        // Don't add to queue if interrupted — DrainTTSQueue may already be gone
+        if (!_interrupted)
+            _orderedClipQueue[order] = clip;
     }
 
     /// <summary>
@@ -258,12 +342,16 @@ public class AITutor : MonoBehaviour
     {
         while (true)
         {
+            // Exit immediately if interrupted
+            if (_interrupted) goto done;
+
             if (_prefetchInFlight == 0 && !_orderedClipQueue.ContainsKey(_playbackOrder))
                 break;
 
             float waitStart = Time.realtimeSinceStartup;
             while (!_orderedClipQueue.ContainsKey(_playbackOrder))
             {
+                if (_interrupted) goto done;
                 if (_prefetchInFlight == 0 && _orderedClipQueue.Count == 0)
                     goto done;
 
@@ -274,6 +362,8 @@ public class AITutor : MonoBehaviour
                 }
                 yield return null;
             }
+
+            if (_interrupted) goto done;
 
             AudioClip clip = _orderedClipQueue[_playbackOrder];
             _orderedClipQueue.Remove(_playbackOrder);
@@ -298,6 +388,8 @@ public class AITutor : MonoBehaviour
             float playStart = Time.realtimeSinceStartup;
             while (!playDone)
             {
+                if (_interrupted) goto done;
+
                 if (_orderedClipQueue.ContainsKey(_playbackOrder) && ttsPlayer?.audioSource != null)
                 {
                     float elapsed   = Time.realtimeSinceStartup - playStart;

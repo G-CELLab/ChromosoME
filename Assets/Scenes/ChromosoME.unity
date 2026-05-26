@@ -20842,8 +20842,13 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 6255691638803911211, guid: 9319dd1df9893a34a896be432a2c5cff,
         type: 3}
+      propertyPath: gestureCooldownSec
+      value: 3
+      objectReference: {fileID: 0}
+    - target: {fileID: 6255691638803911211, guid: 9319dd1df9893a34a896be432a2c5cff,
+        type: 3}
       propertyPath: gestureDefinitions.Array.size
-      value: 4
+      value: 6
       objectReference: {fileID: 0}
     - target: {fileID: 6255691638803911211, guid: 9319dd1df9893a34a896be432a2c5cff,
         type: 3}
@@ -20868,6 +20873,18 @@ PrefabInstance:
       propertyPath: 'gestureDefinitions.Array.data[3]'
       value: 
       objectReference: {fileID: 11400000, guid: 48753907ecbe2f6459a543f7cd100f89,
+        type: 2}
+    - target: {fileID: 6255691638803911211, guid: 9319dd1df9893a34a896be432a2c5cff,
+        type: 3}
+      propertyPath: 'gestureDefinitions.Array.data[4]'
+      value: 
+      objectReference: {fileID: 11400000, guid: f8fd6e0c3cdfc9246845307a8f773809,
+        type: 2}
+    - target: {fileID: 6255691638803911211, guid: 9319dd1df9893a34a896be432a2c5cff,
+        type: 3}
+      propertyPath: 'gestureDefinitions.Array.data[5]'
+      value: 
+      objectReference: {fileID: 11400000, guid: 60fe50eb43748794d8e6ae7f210212cf,
         type: 2}
     m_RemovedComponents: []
     m_RemovedGameObjects: []
