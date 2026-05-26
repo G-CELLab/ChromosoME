@@ -140,6 +140,7 @@ public class AITutor : MonoBehaviour
 
         OnResponseStarted.Invoke(query);
         gestureSynchronizer?.OnResponseStart();
+        animatorDriver?.TriggerThinking();
 
         try
         {
@@ -172,6 +173,7 @@ public class AITutor : MonoBehaviour
                 _sceneState,
                 onSentenceReady: sentence =>
                 {
+                    animatorDriver?.CancelThinking();
                     EnqueueTTS(sentence);
                     fullResponse += (fullResponse.Length > 0 ? " " : "") + sentence;
 

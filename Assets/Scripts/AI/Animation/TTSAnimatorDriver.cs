@@ -17,6 +17,10 @@ public class TTSAnimatorDriver : MonoBehaviour
     public TextToSpeechPlayer tts;
     public Animator animator;
 
+    [Header("Thinking Gesture")]
+    [Tooltip("Trigger parameter name for the thinking animation.")]
+    public string thinkingTriggerParam = "Thinking";
+
     [Header("Animator Parameters")]
     [Tooltip("Bool set to true while TTS audio is playing.")]
     public string isSpeakingParam = "isSpeaking";
@@ -194,5 +198,26 @@ public class TTSAnimatorDriver : MonoBehaviour
     {
         if (ok) Debug.Log($"[TTSAnimatorDriver] ✅ {type} '{name}'");
         else    Debug.LogWarning($"[TTSAnimatorDriver] ❌ Missing {type} '{name}'");
+    }
+
+    // ── Thinking Animation Logic ────────────────────────────────────────────────────
+    private bool _thinkingActive = false;
+
+    public void TriggerThinking()
+    {
+        if (!animator) return;
+        if (!HasTriggerParam(thinkingTriggerParam)) return;
+        animator.ResetTrigger(thinkingTriggerParam);
+        animator.SetTrigger(thinkingTriggerParam);
+        _thinkingActive = true;
+        if (verbose) Debug.Log("[TTSAnimatorDriver] 🤔 Thinking triggered.");
+    }
+
+    public void CancelThinking()
+    {
+        if (!animator || !_thinkingActive) return;
+        animator.ResetTrigger(thinkingTriggerParam);
+        _thinkingActive = false;
+        if (verbose) Debug.Log("[TTSAnimatorDriver] ✅ Thinking cancelled.");
     }
 }

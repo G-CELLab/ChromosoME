@@ -17,6 +17,11 @@ public class TextToSpeechPlayer : MonoBehaviour
     public string ttsModel  = "gpt-4o-mini-tts";
     public string voice     = "nova";
 
+    [TextArea(3, 6)]
+    public string ttsInstructions = "Speak in a warm, friendly, consistent tone. " +
+                                "Maintain a moderate and steady pitch throughout. " +
+                                "Keep energy level calm and even. ";
+
     [Header("Audio")]
     public AudioSource audioSource;
     public bool killAllTTSOnInterrupt = true;
@@ -179,7 +184,8 @@ public class TextToSpeechPlayer : MonoBehaviour
             model           = string.IsNullOrWhiteSpace(ttsModel) ? "gpt-4o-mini-tts" : ttsModel,
             input           = text,
             voice           = voice,
-            response_format = "wav"
+            response_format = "wav",
+            instructions     = ttsInstructions
         });
 
         var req = new UnityWebRequest("https://api.openai.com/v1/audio/speech", "POST");
@@ -398,5 +404,6 @@ public class TextToSpeechPlayer : MonoBehaviour
         public string input;
         public string voice;
         public string response_format;
+        public string instructions;
     }
 }
