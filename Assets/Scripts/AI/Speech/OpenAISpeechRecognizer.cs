@@ -14,6 +14,8 @@ using UnityEngine.Networking;
 ///   - NotifyTTSStarted() is now a direct public method (no reflection)
 ///   - ProcessUtterance is now awaited (yield return) to prevent overlapping requests
 ///   - Barge-in / interrupt logic stripped (AITutor handles response gating)
+///   - OnSpeechStarted event added — fires as soon as VAD detects speech begin
+///     so AITutor can stop TTS immediately without waiting for the transcript
 /// </summary>
 public class OpenAISpeechRecognizer : MonoBehaviour
 {
@@ -52,6 +54,13 @@ public class OpenAISpeechRecognizer : MonoBehaviour
     public float debugLogInterval = 0.25f;
 
     // ── Events ────────────────────────────────────────────────────────────────
+
+    /// <summary>
+    /// Fired immediately when VAD detects speech has started.
+    /// AITutor subscribes to this to stop TTS right away, before the
+    /// transcript is ready. Does NOT fire during the TTS protection window.
+    /// </summary>
+    public event Action OnSpeechStarted;
 
     /// <summary>Fired with the Whisper transcript once an utterance is processed.</summary>
     public event Action<string> OnTranscriptReady;
@@ -116,14 +125,12 @@ public class OpenAISpeechRecognizer : MonoBehaviour
             yield break; 
         }
 
-        // ── NEW: log all available devices ───────────────────────────────────
         Debug.Log($"[Recognizer] Found {Microphone.devices.Length} microphone(s):");
         for (int i = 0; i < Microphone.devices.Length; i++)
             Debug.Log($"[Recognizer]   [{i}] {Microphone.devices[i]}");
 
         _micName = Microphone.devices[0];
         Debug.Log($"[Recognizer] ✔ Using mic: '{_micName}' | sampleRate={sampleRate} maxRecordTime={maxRecordTime}s");
-        // ─────────────────────────────────────────────────────────────────────
 
         yield return RecordingLoop();
     }
@@ -140,7 +147,6 @@ public class OpenAISpeechRecognizer : MonoBehaviour
 
             if (!string.IsNullOrEmpty(wavPath))
             {
-                // Start processing immediately — don't wait for cooldown first
                 StartCoroutine(ProcessUtterance(wavPath));
             }
 
@@ -279,6 +285,10 @@ public class OpenAISpeechRecognizer : MonoBehaviour
                             }
                             silenceTimer = 0f;
                             D("[VAD] Speech started");
+
+                            // ── Fire immediately so AITutor can stop TTS now,
+                            //    before waiting for the full transcript ──────
+                            OnSpeechStarted?.Invoke();
                         }
                     }
                 }
@@ -389,7 +399,6 @@ public class OpenAISpeechRecognizer : MonoBehaviour
 
     private static string ExtractTranscript(string json)
     {
-        // Try JsonUtility first
         try
         {
             var parsed = JsonUtility.FromJson<TranscriptResponse>(json);
@@ -398,7 +407,6 @@ public class OpenAISpeechRecognizer : MonoBehaviour
         }
         catch { /* fall through */ }
 
-        // Regex fallback
         var m = Regex.Match(json ?? "", "\"text\"\\s*:\\s*\"(?<t>(?:\\\\.|[^\"])*)\"");
         return m.Success ? Regex.Unescape(m.Groups["t"].Value) : null;
     }

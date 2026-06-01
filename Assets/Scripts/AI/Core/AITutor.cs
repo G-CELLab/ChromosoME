@@ -17,10 +17,10 @@ using UnityEngine.Events;
 ///     → GestureSynchronizer.ProcessResponse() (keyword-driven, no fallback)
 ///
 /// Interruption:
-///   A new transcript while _isProcessing calls Interrupt(), which sets
-///   _interrupted = true and stops TTS audio immediately. All coroutines
-///   check _interrupted and exit early. The processing gate is released in
-///   the finally block, then the new query starts normally.
+///   OnSpeechStarted fires as soon as VAD detects the user speaking.
+///   This immediately stops TTS and goes to idle — before the transcript arrives.
+///   When the transcript arrives via OnTranscriptReceived, the query is sent
+///   and the thinking animation triggers as normal.
 /// </summary>
 [RequireComponent(typeof(AIResponseGenerator))]
 [AddComponentMenu("AI/AI Tutor")]
@@ -93,13 +93,19 @@ public class AITutor : MonoBehaviour
     private void OnEnable()
     {
         if (speechRecognizer != null)
+        {
             speechRecognizer.OnTranscriptReady += OnTranscriptReceived;
+            speechRecognizer.OnSpeechStarted   += OnUserSpeechStarted;
+        }
     }
 
     private void OnDisable()
     {
         if (speechRecognizer != null)
+        {
             speechRecognizer.OnTranscriptReady -= OnTranscriptReceived;
+            speechRecognizer.OnSpeechStarted   -= OnUserSpeechStarted;
+        }
     }
 
     // ── Public API ────────────────────────────────────────────────────────────
@@ -118,8 +124,8 @@ public class AITutor : MonoBehaviour
 
         if (_isProcessing)
         {
-            // Interrupt the current response and start the new query
-            Debug.Log("[AITutor] Interrupting current response for new query.");
+            // TTS is already stopped by OnUserSpeechStarted — just queue the query
+            Debug.Log("[AITutor] Queuing new query after speech-start interrupt.");
             StartCoroutine(InterruptThenQuery(query));
             return;
         }
@@ -163,6 +169,35 @@ public class AITutor : MonoBehaviour
 
     // ── Internal ──────────────────────────────────────────────────────────────
 
+    /// <summary>
+    /// Called as soon as VAD detects the user has started speaking.
+    /// Stops TTS immediately and returns the animator to idle.
+    /// Does NOT send a query yet — that happens when the transcript arrives.
+    /// </summary>
+    private void OnUserSpeechStarted()
+    {
+        if (!_isProcessing) return;
+
+        Debug.Log("[AITutor] 🎤 Speech detected — stopping TTS immediately.");
+
+        // Stop audio right away
+        if (ttsPlayer != null)
+        {
+            if (ttsPlayer.killAllTTSOnInterrupt)
+                TextToSpeechPlayer.KillAllTTS();
+            else
+                ttsPlayer.StopSpeaking();
+        }
+
+        // Cancel any pending thinking animation and return to idle
+        animatorDriver?.CancelThinking();
+
+        // Mark as interrupted so DrainTTSQueue and other coroutines bail out
+        _interrupted = true;
+        _orderedClipQueue.Clear();
+        _ttsBusy = false;
+    }
+
     private void OnTranscriptReceived(string transcript)
     {
         if (string.IsNullOrWhiteSpace(transcript)) return;
@@ -171,13 +206,11 @@ public class AITutor : MonoBehaviour
     }
 
     /// <summary>
-    /// Interrupts the current response, waits for the gate to release,
+    /// Waits for the processing gate to release after an interrupt,
     /// then starts the new query.
     /// </summary>
     private IEnumerator InterruptThenQuery(string query)
     {
-        Interrupt();
-
         // Wait for the processing gate to release (finally block in RunQueryCoroutine)
         float timeout = Time.realtimeSinceStartup + interruptTimeoutSec;
         while (_isProcessing && Time.realtimeSinceStartup < timeout)
@@ -189,7 +222,7 @@ public class AITutor : MonoBehaviour
             _isProcessing = false;
         }
 
-        // Brief pause so the animator can settle before the new thinking gesture
+        // Brief pause so the animator can settle before the thinking gesture
         yield return new WaitForSecondsRealtime(0.1f);
 
         Debug.Log($"[AITutor] Starting new query after interrupt: {query}");
