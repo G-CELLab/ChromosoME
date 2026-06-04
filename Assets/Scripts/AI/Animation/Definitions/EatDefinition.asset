@@ -19,7 +19,6 @@ MonoBehaviour:
   - eat
   - food
   - eats
-  - energy
   timeScale: 1
   advanceSeconds: 0
   fallbackDelaySeconds: 2

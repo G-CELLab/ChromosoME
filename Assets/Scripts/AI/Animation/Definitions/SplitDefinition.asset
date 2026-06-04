@@ -24,6 +24,8 @@ MonoBehaviour:
   - 'pull to '
   - go to
   - apart
+  - pulled apart
+  - pull apart
   timeScale: 1
   advanceSeconds: 0
   fallbackDelaySeconds: 2

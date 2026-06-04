@@ -5,7 +5,8 @@ using UnityEngine;
 /// Drives the character animator based on TTS state and gesture events.
 ///
 /// Responsibilities:
-///   - Sets isSpeaking bool while audio is playing
+///   - Sets isSpeaking bool while audio is playing OR while TTS player
+///     has IsSpeaking = true (covers pre-fetch window before audio starts)
 ///   - Fires animator Triggers for gestures via TriggerGesture(GestureDefinition)
 ///
 /// The character returns to Idle automatically via the Animator when not speaking.
@@ -20,6 +21,11 @@ public class TTSAnimatorDriver : MonoBehaviour
     [Header("Thinking Gesture")]
     [Tooltip("Trigger parameter name for the thinking animation.")]
     public string thinkingTriggerParam = "Thinking";
+
+    [Tooltip("Trigger for transitioning directly from Idle to Talking, bypassing Thinking. " +
+             "Add a matching trigger in the Animator with a transition Idle → Talking. " +
+             "Used by narration so the agent goes straight to talking without the thinking pose.")]
+    public string startTalkingTriggerParam = "StartTalking";
 
     [Header("Animator Parameters")]
     [Tooltip("Bool set to true while TTS audio is playing.")]
@@ -73,7 +79,13 @@ public class TTSAnimatorDriver : MonoBehaviour
     {
         if (!animator) return;
 
-        bool speaking = tts != null && tts.audioSource != null && tts.audioSource.isPlaying;
+        // Consider speaking if audio is actively playing OR if the TTS player
+        // has flagged IsSpeaking = true (covers the pre-fetch window where
+        // clips are being downloaded but not yet playing through the audio source).
+        bool audioPlaying = tts != null && tts.audioSource != null && tts.audioSource.isPlaying;
+        bool ttsFlagged   = tts != null && tts.IsSpeaking;
+        bool speaking     = audioPlaying || ttsFlagged;
+
         if (_hasIsSpeaking) animator.SetBool(_isSpeakingHash, speaking);
     }
 
@@ -200,7 +212,8 @@ public class TTSAnimatorDriver : MonoBehaviour
         else    Debug.LogWarning($"[TTSAnimatorDriver] ❌ Missing {type} '{name}'");
     }
 
-    // ── Thinking Animation Logic ────────────────────────────────────────────────────
+    // ── Thinking Animation Logic ──────────────────────────────────────────────
+
     private bool _thinkingActive = false;
 
     public void TriggerThinking()
@@ -219,5 +232,24 @@ public class TTSAnimatorDriver : MonoBehaviour
         animator.ResetTrigger(thinkingTriggerParam);
         _thinkingActive = false;
         if (verbose) Debug.Log("[TTSAnimatorDriver] ✅ Thinking cancelled.");
+    }
+
+    /// <summary>
+    /// Transitions directly from Idle to Talking without going through Thinking.
+    /// Call this for narration where no "processing" period exists.
+    /// Requires a "StartTalking" trigger in the Animator with an Idle → Talking transition.
+    /// </summary>
+    public void TriggerStartTalking()
+    {
+        if (!animator) return;
+        if (!HasTriggerParam(startTalkingTriggerParam))
+        {
+            if (verbose)
+                Debug.LogWarning($"[TTSAnimatorDriver] ❗ Animator missing Trigger: '{startTalkingTriggerParam}' — add it with an Idle → Talking transition.");
+            return;
+        }
+        animator.ResetTrigger(startTalkingTriggerParam);
+        animator.SetTrigger(startTalkingTriggerParam);
+        if (verbose) Debug.Log("[TTSAnimatorDriver] 🗣️ StartTalking triggered.");
     }
 }

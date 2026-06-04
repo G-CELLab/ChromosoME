@@ -52,14 +52,14 @@
 1. Grab the red stringy DNA:
    - Locate the red DNA structure in the scene.
    - Use the grab gesture to hold it.
-2. Hold it steady for about 3 seconds:
+2. Hold it steady for about 6 seconds:
    - Condensation will happen automatically as you hold it.
    - Watch the red stringy DNA transform into a red X-shaped chromosome.
 
 ### Short guidance examples
-- "In Prophase, hold the red DNA steady for about 3 seconds so it condenses into an X-shape."
+- "In Prophase, hold the red DNA steady for about 6 seconds so it condenses into an X-shape."
 - "What should you do? Grab and hold the red DNA until it becomes an X-shaped chromosome."
-- "The DNA is condensing—keep it steady until the transformation completes."
+- "The DNA is condensing—keep holding it until the transformation completes."
 
 ### Why this phase matters
 - DNA must condense into visible chromosomes before they can be moved during mitosis.

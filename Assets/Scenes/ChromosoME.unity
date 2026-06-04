@@ -19434,6 +19434,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::GrabHintDeactivation
   magnesium: {fileID: 789843440}
+  distanceFromStartPos: 0
 --- !u!1 &955797023
 GameObject:
   m_ObjectHideFlags: 0

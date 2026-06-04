@@ -1,8 +1,10 @@
 /// <summary>
 /// Live snapshot of the VR scene handed to the AI on every turn.
-/// Owns all AI-facing content — phase context, objectives, visible objects,
-/// healing progress, and proactive Telophase messages.
+/// Owns all AI-facing context — phase name, scene summary, current objective,
+/// visible objects, and healing progress.
 /// Call Refresh() before each query to pull current state from GameManager.
+///
+/// Narration strings (including Telophase messages) live in NarrationLines.cs.
 /// </summary>
 [System.Serializable]
 public class TutorSceneState
@@ -25,12 +27,12 @@ public class TutorSceneState
     {
         int cycle    = GameManager.GetHealingCycleCount();
         int maxCycle = GameManager.MAX_HEALING_CYCLES;
-        int current  = cycle + 1; // cycles completed = cycles done, current = next one
+        int current  = cycle + 1;
 
         HealingProgress = GameManager.IsWoundHealed()
             ? "All 3 healing cycles complete. The wound is fully healed."
             : $"Currently on healing cycle {current} of {maxCycle}. " +
-            $"{cycle} cycle(s) completed so far, {maxCycle - cycle} remaining.";
+              $"{cycle} cycle(s) completed so far, {maxCycle - cycle} remaining.";
 
         switch (GameManager.eGameStatus)
         {
@@ -58,7 +60,7 @@ public class TutorSceneState
             case GameManager.GameState.Prophase:
                 Phase            = "prophase";
                 SceneSummary     = "The cell is preparing to divide. DNA must condense into chromosomes.";
-                CurrentObjective = "Hold the red DNA steady for 3 seconds so it condenses into an X-shaped chromosome.";
+                CurrentObjective = "Hold the red DNA steady for 6 seconds so it condenses into an X-shaped chromosome.";
                 VisibleObjects   = "Red stringy DNA; Blue X-shaped chromosomes (already condensed examples).";
                 break;
 
@@ -96,33 +98,6 @@ public class TutorSceneState
                 CurrentObjective = "";
                 VisibleObjects   = "";
                 break;
-        }
-    }
-
-    // ── Proactive Telophase messages ──────────────────────────────────────────
-
-    /// <summary>
-    /// Returns the proactive spoken message for Telophase based on
-    /// how many healing cycles have been completed.
-    /// Called by GameManager — no AI strings live there.
-    /// </summary>
-    public string GetTelophaseMessage()
-    {
-        switch (GameManager.GetHealingCycleCount())
-        {
-            case 0:
-                return "Great work! You've completed the first round of cell division. " +
-                       "The wound isn't fully healed yet though — in real tissue, many cells must " +
-                       "divide multiple times to fully repair the damage. Touch the wound again to continue.";
-            case 1:
-                return "Excellent! Two rounds of cell division complete. The wound is healing nicely, " +
-                       "but we need one more cycle to fully restore the tissue. Let's finish this!";
-            case 2:
-                return "Congratulations! You've completed all three rounds of mitosis and fully healed the wound. " +
-                       "You've just seen how cells work together to repair tissue. " +
-                       "Touch the healed hand to complete the simulation.";
-            default:
-                return "";
         }
     }
 

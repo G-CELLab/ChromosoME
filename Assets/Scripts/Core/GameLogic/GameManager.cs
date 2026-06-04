@@ -178,6 +178,35 @@ public class GameManager : MonoBehaviour
 
         aiTutor?.RefreshSceneState();
         Debug.Log($"[GameManager] {previous} → {newState}");
+
+        // ── Cycle 1 narration triggers ────────────────────────────────────────
+        // Only fires on the first healing cycle (healingCycleCount == 0).
+        // Intro uses a short delay to let the scene settle first.
+        // Telophase is handled separately via DelayedTelophaseAITrigger (fires every cycle).
+        if (healingCycleCount == 0 && aiTutor != null)
+        {
+            switch (newState)
+            {
+                case GameState.Intro:
+                    StartCoroutine(DelayedNarration(aiTutor.TriggerIntroNarration, 1.5f));
+                    break;
+                case GameState.Interphase:
+                    aiTutor.TriggerInterphaseNarration();
+                    break;
+                case GameState.InterphasePart2:
+                    aiTutor.TriggerInterphasePart2Narration();
+                    break;
+                case GameState.Prophase:
+                    aiTutor.TriggerProphaseNarration();
+                    break;
+                case GameState.Metaphase:
+                    aiTutor.TriggerMetaphaseNarration();
+                    break;
+                case GameState.Anaphase:
+                    aiTutor.TriggerAnaphaseNarration();
+                    break;
+            }
+        }
     }
 
     private void NotifyControllersEnter(GameState phase)
@@ -194,6 +223,12 @@ public class GameManager : MonoBehaviour
 
     // ── AI Tutor ──────────────────────────────────────────────────────────────
 
+    private IEnumerator DelayedNarration(System.Action trigger, float delaySec)
+    {
+        yield return new WaitForSeconds(delaySec);
+        trigger?.Invoke();
+    }
+
     private IEnumerator DelayedTelophaseAITrigger()
     {
         yield return new WaitForSeconds(0.5f);
@@ -204,7 +239,8 @@ public class GameManager : MonoBehaviour
             yield break;
         }
 
-        string message = aiTutor.GetSceneState().GetTelophaseMessage();
+        // Narration string comes from NarrationLines — no content lives here
+        string message = NarrationLines.GetTelophase(healingCycleCount);
         if (!string.IsNullOrEmpty(message))
             ttsPlayer.Speak(message, () => Debug.Log("[GameManager] Telophase speech done."));
     }
