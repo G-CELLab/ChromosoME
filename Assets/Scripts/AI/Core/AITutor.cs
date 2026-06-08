@@ -21,11 +21,15 @@ using UnityEngine.Events;
 ///   This immediately stops TTS and goes to idle — before the transcript arrives.
 ///   When the transcript arrives via OnTranscriptReceived, the query is sent
 ///   and the thinking animation triggers as normal.
+///   Narration is NOT interruptible — _isNarrating blocks all interrupt paths.
 ///
 /// Narration:
 ///   SpeakNarration() plays a fixed pre-written string directly through TTS
 ///   without going through OpenAI. Narration strings live in NarrationLines.cs.
-///   Interruptible by user speech like any other response.
+///   NOT interruptible by user speech — narration must complete fully so the
+///   user has the opportunity to see all gestures during the study.
+///   If the user speaks during narration, their query is queued and answered
+///   immediately after narration completes.
 /// </summary>
 [RequireComponent(typeof(AIResponseGenerator))]
 [AddComponentMenu("AI/AI Tutor")]
@@ -68,6 +72,7 @@ public class AITutor : MonoBehaviour
     private readonly Dictionary<string, AudioClip> _narrationCache = new Dictionary<string, AudioClip>();
 
     private bool  _isProcessing   = false;
+    private bool  _isNarrating    = false;  // true only during narration — blocks all interrupts
     private bool  _interrupted    = false;
     private float _lastResponseAt = -999f;
 
@@ -149,7 +154,7 @@ public class AITutor : MonoBehaviour
     /// <summary>
     /// Speaks a fixed narration string directly through TTS without going
     /// through OpenAI. Narration strings live in NarrationLines.cs.
-    /// Interruptible by user speech like any other response.
+    /// NOT interruptible — narration plays to completion regardless of user speech.
     /// Skipped silently if the agent is already processing.
     /// </summary>
     public void SpeakNarration(string text)
@@ -177,10 +182,17 @@ public class AITutor : MonoBehaviour
     /// <summary>
     /// Immediately stops TTS playback and signals all coroutines to exit.
     /// The processing gate is released by the finally block in the active coroutine.
+    /// Blocked during narration — narration must complete fully.
     /// </summary>
     public void Interrupt()
     {
         if (!_isProcessing) return;
+
+        if (_isNarrating)
+        {
+            Debug.Log("[AITutor] 🛑 Interrupt blocked — narration in progress.");
+            return;
+        }
 
         Debug.Log("[AITutor] 🛑 Interrupt called.");
         _interrupted = true;
@@ -202,6 +214,12 @@ public class AITutor : MonoBehaviour
     private void OnUserSpeechStarted()
     {
         if (!_isProcessing) return;
+
+        if (_isNarrating)
+        {
+            Debug.Log("[AITutor] 🎤 Speech detected during narration — ignored.");
+            return;
+        }
 
         Debug.Log("[AITutor] 🎤 Speech detected — stopping TTS immediately.");
 
@@ -230,6 +248,12 @@ public class AITutor : MonoBehaviour
 
     private IEnumerator InterruptThenQuery(string query)
     {
+        if (_isNarrating)
+        {
+            Debug.Log("[AITutor] Query dropped — asked during narration.");
+            yield break;
+        }
+
         float timeout = Time.realtimeSinceStartup + interruptTimeoutSec;
         while (_isProcessing && Time.realtimeSinceStartup < timeout)
             yield return null;
@@ -251,12 +275,13 @@ public class AITutor : MonoBehaviour
     private IEnumerator NarrationCoroutine(string text)
     {
         _isProcessing = true;
+        _isNarrating  = true;
         _interrupted  = false;
 
         gestureSynchronizer?.OnResponseStart();
         speechRecognizer?.NotifyTTSStarted();
 
-        Debug.Log($"[AITutor] 📢 Narration: {text.Substring(0, Mathf.Min(60, text.Length))}...");
+        Debug.Log($"[AITutor] 📢 Narration: {text}");
 
         if (!_interrupted)
         {
@@ -280,6 +305,7 @@ public class AITutor : MonoBehaviour
         }
         finally
         {
+            _isNarrating      = false;
             _isProcessing     = false;
             _ttsBusy          = false;
             _prefetchInFlight = 0;
@@ -496,9 +522,9 @@ public class AITutor : MonoBehaviour
                     if (elapsed > 0.3f && remaining < 0.12f) break;
                 }
 
-                if (Time.realtimeSinceStartup - playStart > 30f)
+                if (Time.realtimeSinceStartup - playStart > 40f)
                 {
-                    Debug.LogWarning("[AITutor] Playback timed out (30s).");
+                    Debug.LogWarning("[AITutor] Playback timed out (40s).");
                     break;
                 }
                 yield return null;
@@ -550,7 +576,6 @@ public class AITutor : MonoBehaviour
         yield return _generator.WarmUp();
     }
 
-
     private IEnumerator PrefetchAllNarrations()
     {
         string[] lines = new[]
@@ -560,7 +585,10 @@ public class AITutor : MonoBehaviour
             NarrationLines.InterphasePart2,
             NarrationLines.Prophase,
             NarrationLines.Metaphase,
-            NarrationLines.Anaphase
+            NarrationLines.Anaphase,
+            NarrationLines.Telophase[0],
+            NarrationLines.Telophase[1],
+            NarrationLines.Telophase[2]
         };
 
         foreach (string line in lines)

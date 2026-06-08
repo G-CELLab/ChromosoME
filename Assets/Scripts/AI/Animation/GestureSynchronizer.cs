@@ -38,7 +38,7 @@ public class GestureSynchronizer : MonoBehaviour
     public float charactersPerSecond = 15.3f;
 
     [Tooltip("If the calculated delay exceeds this, it is clamped to this value.")]
-    public float maxGestureDelaySec = 10f;
+    public float maxGestureDelaySec = 35f;
 
     [Tooltip("How long to wait for audio playback to start before falling back to relative timing.")]
     public float maxWaitForAudioStartSec = 6f;
@@ -157,7 +157,7 @@ public class GestureSynchronizer : MonoBehaviour
                               $"for gesture '{def.gestureName}' — scheduled in {delay:F2}s " +
                               $"(estimated fire at +{delay:F2}s)");
 
-                return true;
+                break;
             }
         }
 

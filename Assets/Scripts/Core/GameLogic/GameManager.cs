@@ -52,7 +52,6 @@ public class GameManager : MonoBehaviour
     // ── Scene References ──────────────────────────────────────────────────────
     [Header("Scene References")]
     [SerializeField] private AITutor aiTutor;
-    public TextToSpeechPlayer ttsPlayer;
 
     [Header("Reset Manager")]
     [SerializeField] private ResetManager resetManager;
@@ -233,15 +232,14 @@ public class GameManager : MonoBehaviour
     {
         yield return new WaitForSeconds(0.5f);
 
-        if (ttsPlayer == null || aiTutor == null)
+        if (aiTutor == null)
         {
-            Debug.LogWarning("[GameManager] TTS or AITutor not assigned.");
+            Debug.LogWarning("[GameManager] AITutor not assigned.");
             yield break;
         }
 
-        // Narration string comes from NarrationLines — no content lives here
         string message = NarrationLines.GetTelophase(healingCycleCount);
         if (!string.IsNullOrEmpty(message))
-            ttsPlayer.Speak(message, () => Debug.Log("[GameManager] Telophase speech done."));
+            aiTutor.SpeakNarration(message);
     }
 }

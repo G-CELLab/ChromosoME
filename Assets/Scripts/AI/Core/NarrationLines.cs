@@ -30,20 +30,19 @@ public static class NarrationLines
 
     public static readonly string InterphasePart2 =
         "The cell's energy is charged up! Now you need to duplicate the centriole — find the yellow " +
-        "barrel-shaped centriole and grab it to create a copy. The centrioles will move to opposite sides " +
+        "barrel-shaped centriole, grab it, and move it a short distance away to create a copy. The centrioles will move to opposite sides " +
         "of the cell and organize the spindle fibers that will move the chromosomes during division!";
-        // also mention that you should grab and move the centriole
 
     public static readonly string Prophase =
         "Now we're in Prophase — where the cell's DNA condenses into an X-shape and the spindle " +
         "fibers begin to form. Find the red stringy DNA and grab it, then hold it steady for about " +
-        "6 seconds so it condenses into a tightly packed X-shaped chromosome. This X shape is actually " +
-        "two identical copies of the DNA joined together, ready to be separated into the new cells!";
+        "6 seconds so it condenses into a tightly packed X-shaped chromosome. This X shape is " +
+        "two identical copies of the DNA joined together.";
 
     public static readonly string Metaphase =
         "This is Metaphase, where all the chromosomes line up along the center of the cell so they can be " +
         "evenly divided. Grab the red X-shaped chromosome and move it to the sparkly area in the middle " +
-        "to align it with the other chromosomes. Each new cell must receive exactly one complete copy of every chromosome!";
+        "to align it with the other chromosomes. Each new cell must receive one complete copy of every chromosome!";
 
     public static readonly string Anaphase =
         "Now we're in Anaphase — the stage where the chromosomes are pulled apart! Grab each side of the " +
@@ -56,13 +55,15 @@ public static class NarrationLines
     {
         // Cycle 1 (healingCycleCount == 0)
         "Great work! You've completed the first round of cell division. " +
+        "See that the two cells are splitting, and their genetic material is evenly distributed. " +
+        // "This ensures that both new cells will grow and repair the wound effectively!" + // Use this if its not too long
         "The wound isn't fully healed yet though — in real tissue, many cells must " +
         "divide multiple times to fully repair the damage. " +
         "Also, notice the red bar at the top — that's your healing progress. " +
         "Each time the cell successfully divides, the wound heals a little more. " +
+        "From now on, I won't automatically explain each of the phases, so feel free to ask me any question if you are unsure about something!" +
         "Touch the wound again to continue!",
-        // add that to they need to look at the 2 cells splitting
-        // explain that from now on that she wont start conversation, so ask me question if you want
+        // change the name of the hp bar to healing progress
 
         // Cycle 2 (healingCycleCount == 1)
         "Excellent! Two rounds of cell division complete. The wound is healing nicely, " +
