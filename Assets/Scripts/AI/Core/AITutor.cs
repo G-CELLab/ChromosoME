@@ -42,6 +42,7 @@ public class AITutor : MonoBehaviour
     [SerializeField] private TTSAnimatorDriver      animatorDriver;
     [SerializeField] private OpenAISpeechRecognizer speechRecognizer;
     [SerializeField] private GestureSynchronizer    gestureSynchronizer;
+    [SerializeField] private NarrationLockController narrationLock;
 
     [Header("RAG Settings")]
     [Tooltip("Path relative to Assets folder. e.g. 'Scripts/AI/knowledge_base'")]
@@ -75,11 +76,11 @@ public class AITutor : MonoBehaviour
     private bool  _isNarrating    = false;  // true only during narration — blocks all interrupts
     private bool  _interrupted    = false;
     private float _lastResponseAt = -999f;
-
     private bool _ttsBusy          = false;
     private int  _prefetchInFlight = 0;
     private int  _enqueueOrder     = 0;
     private int  _playbackOrder    = 0;
+    private string _pendingNarration = null;
 
     private readonly SortedDictionary<int, AudioClip> _orderedClipQueue
         = new SortedDictionary<int, AudioClip>();
@@ -95,6 +96,7 @@ public class AITutor : MonoBehaviour
         if (animatorDriver      == null) animatorDriver      = FindAnyObjectByType<TTSAnimatorDriver>();
         if (speechRecognizer    == null) speechRecognizer    = FindAnyObjectByType<OpenAISpeechRecognizer>();
         if (gestureSynchronizer == null) gestureSynchronizer = FindAnyObjectByType<GestureSynchronizer>();
+        if (narrationLock       == null) narrationLock        = FindAnyObjectByType<NarrationLockController>();
 
         BuildRAGIndex();
         StartCoroutine(WarmUpOnStart());
@@ -163,7 +165,8 @@ public class AITutor : MonoBehaviour
 
         if (_isProcessing)
         {
-            Debug.Log("[AITutor] Narration skipped — already processing.");
+            Debug.Log("[AITutor] Narration queued — will play after current response.");
+            _pendingNarration = text;
             return;
         }
 
@@ -276,6 +279,7 @@ public class AITutor : MonoBehaviour
     {
         _isProcessing = true;
         _isNarrating  = true;
+        narrationLock?.Lock();
         _interrupted  = false;
 
         gestureSynchronizer?.OnResponseStart();
@@ -306,6 +310,7 @@ public class AITutor : MonoBehaviour
         finally
         {
             _isNarrating      = false;
+            narrationLock?.Unlock();
             _isProcessing     = false;
             _ttsBusy          = false;
             _prefetchInFlight = 0;
@@ -431,6 +436,13 @@ public class AITutor : MonoBehaviour
                 Debug.Log("[AITutor] Processing gate released.");
         }
 
+        if (ttsCompleted && !string.IsNullOrEmpty(_pendingNarration))
+        {
+            string pending    = _pendingNarration;
+            _pendingNarration = null;
+            SpeakNarration(pending);
+        }
+
         if (ttsCompleted)
             OnResponseCompleted.Invoke(fullResponse);
     }
@@ -519,7 +531,7 @@ public class AITutor : MonoBehaviour
                     float remaining = ttsPlayer.audioSource.clip != null
                         ? ttsPlayer.audioSource.clip.length - ttsPlayer.audioSource.time
                         : 0f;
-                    if (elapsed > 0.3f && remaining < 0.12f) break;
+                    if (elapsed > 0.3f && remaining < 0.15f) break;
                 }
 
                 if (Time.realtimeSinceStartup - playStart > 40f)

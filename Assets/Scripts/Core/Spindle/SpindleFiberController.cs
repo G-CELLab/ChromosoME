@@ -44,6 +44,7 @@ public class SpindleFiberController : MonoBehaviour, IPhaseController
         {
             GameObject fiberObj = new GameObject($"_SpindleFiber_{i}");
             fiberObj.transform.SetParent(transform, false);
+            fiberObj.layer = LayerMask.NameToLayer("UI");
             LineRenderer lr = fiberObj.AddComponent<LineRenderer>();
             lr.positionCount  = 2;
             lr.startWidth     = fiberWidth;

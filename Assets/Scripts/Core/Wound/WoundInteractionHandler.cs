@@ -13,6 +13,7 @@ public class WoundInteractionHandler : MonoBehaviour
     [Header("References")]
     public GameManager gameManager;
     public FadeScreen fadeScreen;
+    public NarrationLockController narrationLock;
 
     [Header("Loading Circle")]
     public LoadingCircle loadingCircle;
@@ -24,6 +25,7 @@ public class WoundInteractionHandler : MonoBehaviour
     private HashSet<Collider> activeColliders = new HashSet<Collider>();
 
     // ── Lifecycle ─────────────────────────────────────────────────────────────
+
     private void Awake()
     {
         loadingCircle.Initialize();
@@ -39,6 +41,7 @@ public class WoundInteractionHandler : MonoBehaviour
     }
 
     // ── Trigger Detection ─────────────────────────────────────────────────────
+
     private void OnTriggerEnter(Collider other)
     {
         if (!other.CompareTag("Left") && !other.CompareTag("Right")) return;
@@ -59,14 +62,17 @@ public class WoundInteractionHandler : MonoBehaviour
     }
 
     // ── Update ────────────────────────────────────────────────────────────────
+
     private void Update()
     {
         if (isFinished || activeColliders.Count == 0) return;
+        if (narrationLock != null && narrationLock.IsLocked) return;
         if (loadingCircle.Tick(Time.deltaTime))
             CompleteInteraction();
     }
 
     // ── Completion ────────────────────────────────────────────────────────────
+
     private void CompleteInteraction()
     {
         isFinished = true;
@@ -74,16 +80,15 @@ public class WoundInteractionHandler : MonoBehaviour
 
         if (GameManager.eGameStatus == GameManager.GameState.Telophase)
         {
-            GameManager.IncrementHealingCycle(); // increment first
+            GameManager.IncrementHealingCycle();
 
-            if (GameManager.IsWoundHealed()) // then check
+            if (GameManager.IsWoundHealed())
             {
                 Debug.Log("[WoundInteractionHandler] Wound fully healed — ending game.");
                 gameManager?.GameEnd();
                 return;
             }
 
-            
             Debug.Log($"[WoundInteractionHandler] Cycle {GameManager.GetHealingCycleCount()}/{GameManager.MAX_HEALING_CYCLES} complete. HP: {ScoreManager.HPtracking}");
         }
 
@@ -92,6 +97,7 @@ public class WoundInteractionHandler : MonoBehaviour
     }
 
     // ── Coroutines ────────────────────────────────────────────────────────────
+
     private IEnumerator FadeAndTransition()
     {
         if (fadeScreen != null)

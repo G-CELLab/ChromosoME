@@ -246,4 +246,11 @@ public class HandManager : MonoBehaviour, IPhaseController
             if (s.running) { handSubsystem = s; return; }
         }
     }
+    // ── Public API ───────────────────────────────────────────────────────────
+    // Allows external scripts (like GameManager) to enable/disable hand interactivity (e.g. while narration is in progress)
+    public void SetInteractionEnabled(bool enabled)
+    {
+        if (handInteractor != null)
+            handInteractor.enabled = enabled;
+    }
 }

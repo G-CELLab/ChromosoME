@@ -190,19 +190,19 @@ public class GameManager : MonoBehaviour
                     StartCoroutine(DelayedNarration(aiTutor.TriggerIntroNarration, 1.5f));
                     break;
                 case GameState.Interphase:
-                    aiTutor.TriggerInterphaseNarration();
+                    StartCoroutine(DelayedNarration(aiTutor.TriggerInterphaseNarration, 1.5f));
                     break;
                 case GameState.InterphasePart2:
-                    aiTutor.TriggerInterphasePart2Narration();
+                    StartCoroutine(DelayedNarration(aiTutor.TriggerInterphasePart2Narration, 1.5f));
                     break;
                 case GameState.Prophase:
-                    aiTutor.TriggerProphaseNarration();
+                    StartCoroutine(DelayedNarration(aiTutor.TriggerProphaseNarration, 1.5f));
                     break;
                 case GameState.Metaphase:
-                    aiTutor.TriggerMetaphaseNarration();
+                    StartCoroutine(DelayedNarration(aiTutor.TriggerMetaphaseNarration, 1.5f));
                     break;
                 case GameState.Anaphase:
-                    aiTutor.TriggerAnaphaseNarration();
+                    StartCoroutine(DelayedNarration(aiTutor.TriggerAnaphaseNarration, 1.5f));
                     break;
             }
         }
@@ -230,7 +230,7 @@ public class GameManager : MonoBehaviour
 
     private IEnumerator DelayedTelophaseAITrigger()
     {
-        yield return new WaitForSeconds(0.5f);
+        yield return new WaitForSeconds(1.5f);
 
         if (aiTutor == null)
         {

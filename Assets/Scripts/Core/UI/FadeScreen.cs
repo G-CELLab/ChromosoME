@@ -11,6 +11,7 @@ public class FadeScreen : MonoBehaviour
     {
         rend = GetComponent<Renderer>();
         SetAlpha(0f);
+        gameObject.layer = LayerMask.NameToLayer("Agent");
 
         if (transform.parent != null)
             transform.SetParent(null, true);
