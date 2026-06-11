@@ -125,7 +125,6 @@ public class ChromatidPoleDetector : MonoBehaviour, IPhaseController
         if (otherSide != null && otherSide.success)
         {
             Debug.Log("[ChromatidPoleDetector] Both sides complete — triggering Telophase.");
-            ScoreManager.HPtracking += 0.3f;
             gameManager?.Telophase();
         }
     }

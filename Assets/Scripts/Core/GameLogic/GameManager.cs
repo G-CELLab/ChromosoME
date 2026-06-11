@@ -64,6 +64,7 @@ public class GameManager : MonoBehaviour
     [Header("Healing Cycle Tracking")]
     public static int healingCycleCount = 0;
     public const int MAX_HEALING_CYCLES = 3;
+    public static float HPtracking = 0.0f;
 
     public static void IncrementHealingCycle()
     {
@@ -90,23 +91,44 @@ public class GameManager : MonoBehaviour
 
     // ── Gameplay ──────────────────────────────────────────────────────────────
 
-    public void FoodCollision()
+    public void NutrientCollision()
     {
         try { LogEventHelper.LogATPCharged(); }
         catch (System.Exception ex) { Debug.LogWarning($"[GameManager] LogEventHelper failed: {ex.Message}"); }
 
         if (atpSliderImg != null)
-            atpSliderImg.fillAmount = Mathf.Clamp01(atpSliderImg.fillAmount + 0.3f);
+            atpSliderImg.fillAmount = Mathf.Clamp01(atpSliderImg.fillAmount + 0.333f);
 
         Debug.Log("[GameManager] ATP charged.");
     }
 
     public void CellDivided()
     {
+        HPtracking = Mathf.Clamp01(HPtracking + 0.333f);
+        DrainATP();
+        SyncHpBar();
         if (hpSliderImg != null)
-            hpSliderImg.fillAmount = Mathf.Clamp01(hpSliderImg.fillAmount + 0.3f);
+            hpSliderImg.fillAmount = HPtracking;
+        Debug.Log($"[GameManager] HP charged. HP: {HPtracking}");
+    }
 
-        Debug.Log("[GameManager] HP charged.");
+    public void DrainATP()
+    {
+        StartCoroutine(DrainATPCoroutine());
+    }
+
+    private IEnumerator DrainATPCoroutine()
+    {
+        if (atpSliderImg == null) yield break;
+
+        while (atpSliderImg.fillAmount > 0f)
+        {
+            yield return new WaitForSeconds(1f);
+            atpSliderImg.fillAmount = Mathf.Clamp01(atpSliderImg.fillAmount - 0.333f);
+        }
+
+        // Snap to exactly 0 in case of float drift
+        atpSliderImg.fillAmount = 0f;
     }
 
     // ── Lifecycle ─────────────────────────────────────────────────────────────
@@ -119,6 +141,7 @@ public class GameManager : MonoBehaviour
     private void Start()
     {
         Debug.Log($"[GameManager] Starting — Cycle: {healingCycleCount}/{MAX_HEALING_CYCLES}");
+        SyncHpBar();
         StartCoroutine(DelayedStart());
     }
 
@@ -142,6 +165,7 @@ public class GameManager : MonoBehaviour
     public void Telophase()
     {
         TransitionTo(GameState.Telophase);
+        CellDivided();
         StartCoroutine(DelayedTelophaseAITrigger());
     }
 
@@ -150,7 +174,18 @@ public class GameManager : MonoBehaviour
     public void ResetForNextCycle()
     {
         resetManager?.ResetAll();
+        SyncHpBar();
+
+        if (atpSliderImg != null)
+            atpSliderImg.fillAmount = 0.0f;
+        
         Debug.Log("[GameManager] Scene reset for next cycle.");
+    }
+
+    private void SyncHpBar()
+    {
+        if (hpSliderImg != null)
+            hpSliderImg.fillAmount = HPtracking;
     }
 
     // ── Core Transition Logic ─────────────────────────────────────────────────
@@ -187,7 +222,7 @@ public class GameManager : MonoBehaviour
             switch (newState)
             {
                 case GameState.Intro:
-                    StartCoroutine(DelayedNarration(aiTutor.TriggerIntroNarration, 1.5f));
+                    StartCoroutine(DelayedNarration(aiTutor.TriggerIntroNarration, 3.0f));
                     break;
                 case GameState.Interphase:
                     StartCoroutine(DelayedNarration(aiTutor.TriggerInterphaseNarration, 1.5f));

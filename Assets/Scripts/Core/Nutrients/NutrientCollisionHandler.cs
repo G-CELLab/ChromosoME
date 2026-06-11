@@ -74,7 +74,7 @@ public class NutrientCollisionHandler : MonoBehaviour, IPhaseController
             if (proteinTimer >= collectTime)
             {
                 proteinCollected = true;
-                gameManager?.FoodCollision();
+                gameManager?.NutrientCollision();
                 protein.SetActive(false);
                 Debug.Log("[NutrientCollisionHandler] Protein collected.");
             }
@@ -85,7 +85,7 @@ public class NutrientCollisionHandler : MonoBehaviour, IPhaseController
             if (magnesiumTimer >= collectTime)
             {
                 magnesiumCollected = true;
-                gameManager?.FoodCollision();
+                gameManager?.NutrientCollision();
                 magnesium.SetActive(false);
                 Debug.Log("[NutrientCollisionHandler] Magnesium collected.");
             }
@@ -96,7 +96,7 @@ public class NutrientCollisionHandler : MonoBehaviour, IPhaseController
             if (vitaminCTimer >= collectTime)
             {
                 vitaminCCollected = true;
-                gameManager?.FoodCollision();
+                gameManager?.NutrientCollision();
                 vitaminC.SetActive(false);
                 Debug.Log("[NutrientCollisionHandler] Vitamin C collected.");
             }

@@ -37,7 +37,7 @@ public class WoundInteractionHandler : MonoBehaviour
         activeColliders.Clear();
         loadingCircle?.Reset();
         if (hpBar != null)
-            hpBar.fillAmount = ScoreManager.HPtracking;
+            hpBar.fillAmount = GameManager.HPtracking;
     }
 
     // ── Trigger Detection ─────────────────────────────────────────────────────
@@ -89,7 +89,7 @@ public class WoundInteractionHandler : MonoBehaviour
                 return;
             }
 
-            Debug.Log($"[WoundInteractionHandler] Cycle {GameManager.GetHealingCycleCount()}/{GameManager.MAX_HEALING_CYCLES} complete. HP: {ScoreManager.HPtracking}");
+            Debug.Log($"[WoundInteractionHandler] Cycle {GameManager.GetHealingCycleCount()}/{GameManager.MAX_HEALING_CYCLES} complete. HP: {GameManager.HPtracking}");
         }
 
         Debug.Log("[WoundInteractionHandler] Transitioning to Interphase.");

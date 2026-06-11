@@ -168,13 +168,7 @@ MonoBehaviour:
     - line: '|   visionOSBundleVersion: 1.0'
     - line: '|   tvOSBundleVersion: 1.0'
     - line: '|   bundleVersion: 0.1'
-    - line: '|   preloadedAssets:'
-    - line: '|   - {fileID: -3122687470934869678, guid: 2f7409c6eba22154c8187f6306da542b,
-        type: 2}'
-    - line: '|   - {fileID: 11400000, guid: 4b3fed9f0e3aa8a4c99051f273e12bf8, type:
-        2}'
-    - line: '|   - {fileID: 4140911022676194556, guid: 1885ac72d0af7584ab9aeecc30ba6430,
-        type: 2}'
+    - line: '|   preloadedAssets: []'
     - line: '|   metroInputSource: 0'
     - line: '|   wsaTransparentSwapchain: 0'
     - line: '|   xboxOneDisableKinectGpuReservation: 1'
