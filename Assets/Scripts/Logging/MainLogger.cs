@@ -8,14 +8,19 @@ using UnityEngine.XR.Interaction.Toolkit.Interactors;
 
 /// <summary>
 /// Comprehensive logging system that tracks:
-/// - Gestures (left/right pinch)
+/// - Gestures (left/right grab)
 /// - Touches (what objects hands are touching)
 /// - Info Panel state (which tutorial panel is active)
 /// - Phase changes (game phase transitions)
 /// - Other events (wound trigger, ATP charged, etc.)
-/// 
+/// - User speech and AI speech/gesture events
+///
 /// Logs to console and MainLog.csv with columns:
-/// Time, Left Gesture, Right Gesture, Left Touch, Right Touch, Info Panel, Phase, Other
+/// Time, Left Gesture, Right Gesture, Left Touch, Right Touch, Phase, User_Speech, AI_Speech, AI_Gesture, Other
+///
+/// Also caches the most recently computed values via public Last* properties
+/// so CombinedLogger can merge them with hand/player position data without
+/// re-deriving or re-dequeuing anything.
 /// </summary>
 public class MainLogger : MonoBehaviour
 {
@@ -53,11 +58,24 @@ public class MainLogger : MonoBehaviour
     // Queue for user utterances sent to the AI agent.
     private Queue<string> userSpeechQueue = new Queue<string>();
 
-    // Last valid touch values used to smooth transient trigger dropouts while pinching.
+    // Last valid touch values used to smooth transient trigger dropouts while grabbing.
     private string lastStableLeftTouch  = "";
     private string lastStableRightTouch = "";
 
     public static MainLogger instance;
+
+    // ── Cached last-frame values (read by CombinedLogger) ──────────────────────
+
+    public float  LastElapsed      { get; private set; }
+    public string LastLeftGesture  { get; private set; } = "";
+    public string LastRightGesture { get; private set; } = "";
+    public string LastLeftTouch    { get; private set; } = "";
+    public string LastRightTouch   { get; private set; } = "";
+    public string LastPhase        { get; private set; } = "";
+    public string LastUserSpeech   { get; private set; } = "";
+    public string LastAISpeech     { get; private set; } = "";
+    public string LastAIGesture    { get; private set; } = "";
+    public string LastOther        { get; private set; } = "";
 
     private void Awake()
     {
@@ -152,6 +170,18 @@ public class MainLogger : MonoBehaviour
         string aiSpeech     = GetAISpeech();
         string otherEvent   = otherEventQueue.Count > 0 ? otherEventQueue.Dequeue() : "";
 
+        // Cache for CombinedLogger
+        LastElapsed      = elapsed;
+        LastLeftGesture  = leftGesture;
+        LastRightGesture = rightGesture;
+        LastLeftTouch    = leftTouch;
+        LastRightTouch   = rightTouch;
+        LastPhase        = phase;
+        LastUserSpeech   = userSpeech;
+        LastAISpeech     = aiSpeech;
+        LastAIGesture    = aiGesture;
+        LastOther        = otherEvent;
+
         if (logToConsole)
             Debug.Log($"[MainLog] T={elapsed:F2}s | L_Ges:{leftGesture} | R_Ges:{rightGesture} | AI_Ges:{aiGesture} | User:{userSpeech} | L_Touch:{leftTouch} | R_Touch:{rightTouch} | Phase:{phase} | AI:{aiSpeech} | Other:{otherEvent}");
 
@@ -166,20 +196,20 @@ public class MainLogger : MonoBehaviour
     {
         if (leftHandManager == null || !leftHandManager.isGrabbed)
             return "";
-        return "Left_Pinch";
+        return "Left_Grab";
     }
 
     private string GetRightGesture()
     {
         if (rightHandManager == null || !rightHandManager.isGrabbed)
             return "";
-        return "Right_Pinch";
+        return "Right_Grab";
     }
 
     private string GetLeftTouch()
     {
-        bool isPinching = leftHandManager != null && leftHandManager.isGrabbed;
-        if (isPinching)
+        bool isGrabbing = leftHandManager != null && leftHandManager.isGrabbed;
+        if (isGrabbing)
         {
             string selectedNutrient = GetSelectedNutrientName(leftHandManager);
             if (!string.IsNullOrEmpty(selectedNutrient))
@@ -198,10 +228,10 @@ public class MainLogger : MonoBehaviour
             return cleanedTouch;
         }
 
-        if (isPinching && !string.IsNullOrEmpty(lastStableLeftTouch))
+        if (isGrabbing && !string.IsNullOrEmpty(lastStableLeftTouch))
             return lastStableLeftTouch;
 
-        if (!isPinching)
+        if (!isGrabbing)
             lastStableLeftTouch = "";
 
         return "";
@@ -209,8 +239,8 @@ public class MainLogger : MonoBehaviour
 
     private string GetRightTouch()
     {
-        bool isPinching = rightHandManager != null && rightHandManager.isGrabbed;
-        if (isPinching)
+        bool isGrabbing = rightHandManager != null && rightHandManager.isGrabbed;
+        if (isGrabbing)
         {
             string selectedNutrient = GetSelectedNutrientName(rightHandManager);
             if (!string.IsNullOrEmpty(selectedNutrient))
@@ -229,10 +259,10 @@ public class MainLogger : MonoBehaviour
             return cleanedTouch;
         }
 
-        if (isPinching && !string.IsNullOrEmpty(lastStableRightTouch))
+        if (isGrabbing && !string.IsNullOrEmpty(lastStableRightTouch))
             return lastStableRightTouch;
 
-        if (!isPinching)
+        if (!isGrabbing)
             lastStableRightTouch = "";
 
         return "";
@@ -346,18 +376,7 @@ public class MainLogger : MonoBehaviour
     private string GetAISpeech()
     {
         string speech = TextToSpeechPlayer.GetCurrentSpeech();
-        if (string.IsNullOrEmpty(speech) || ShouldIgnoreTutorialSpeech(speech))
-            return "";
-        return speech;
-    }
-
-    private bool ShouldIgnoreTutorialSpeech(string speech)
-    {
-        if (string.IsNullOrEmpty(speech)) return false;
-        string normalized = speech.Trim().ToLowerInvariant();
-        return normalized.Contains("let's start by touching and holding the sphere") ||
-               normalized.Contains("im your ai tutor, here to guide you") ||
-               normalized.Contains("i'm your ai tutor, here to guide you");
+        return string.IsNullOrEmpty(speech) ? "" : speech;
     }
 
     private void InitializeCSVFile()

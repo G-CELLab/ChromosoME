@@ -5,6 +5,9 @@ using UnityEngine;
 /// <summary>
 /// Logs left and right hand positions to console and CSV file.
 /// Tracks the actual XR hand objects directly from the XROrigin.
+///
+/// Also caches the most recently computed positions via public Last*
+/// properties so CombinedLogger can merge them with the other logs.
 /// </summary>
 public class HandPositionLogger : MonoBehaviour
 {
@@ -28,6 +31,11 @@ public class HandPositionLogger : MonoBehaviour
     // Cycle tracking
     private int currentCycle = 0;
     private int lastCycle = -1;
+
+    // ── Cached last-frame values (read by CombinedLogger) ──────────────────────
+
+    public Vector3 LastLeftPosition  { get; private set; }
+    public Vector3 LastRightPosition { get; private set; }
 
     private void Start()
     {
@@ -115,6 +123,10 @@ public class HandPositionLogger : MonoBehaviour
         // Get hand positions
         Vector3 leftPos = leftHandTransform.position;
         Vector3 rightPos = rightHandTransform.position;
+
+        // Cache for CombinedLogger
+        LastLeftPosition  = leftPos;
+        LastRightPosition = rightPos;
 
         // Console logging
         if (logToConsole)

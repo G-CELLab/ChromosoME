@@ -87,7 +87,7 @@ public abstract class HandTouchDetector : MonoBehaviour
         if (priorityCollider != best)
         {
             priorityCollider = best;
-            SetTouchObject(GetColliderLogName(best));
+            SetTouchObject(ColliderNameResolver.ResolveName(best.transform));
         }
     }
 
@@ -124,25 +124,6 @@ public abstract class HandTouchDetector : MonoBehaviour
         if (lower.Contains("mitochond")) return 100;
 
         return 500;
-    }
-
-    private string GetColliderLogName(Collider col)
-    {
-        if (col == null) return "";
-
-        Transform current = col.transform;
-        while (current != null)
-        {
-            // Use name-based detection since all nutrients now share the "Nutrient" tag
-            string lower = current.name.ToLowerInvariant();
-            if (lower.Contains("protein"))   return "Protein";
-            if (lower.Contains("magnesium")) return "Magnesium";
-            if (lower.Contains("vitamin"))   return "VitaminC";
-
-            current = current.parent;
-        }
-
-        return col.name;
     }
 
     // ── Helpers ───────────────────────────────────────────────────────────────

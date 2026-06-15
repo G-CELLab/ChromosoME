@@ -30,6 +30,12 @@ using UnityEngine.Events;
 ///   user has the opportunity to see all gestures during the study.
 ///   If the user speaks during narration, their query is queued and answered
 ///   immediately after narration completes.
+///
+/// Logging:
+///   Both EnqueueTTS() and the narration path call
+///   TextToSpeechPlayer.SetCurrentSpeech() with the text about to be spoken,
+///   so MainLogger's AI_Speech column captures every response and narration
+///   line (not just ones routed through TextToSpeechPlayer.Speak()).
 /// </summary>
 [RequireComponent(typeof(AIResponseGenerator))]
 [AddComponentMenu("AI/AI Tutor")]
@@ -289,7 +295,11 @@ public class AITutor : MonoBehaviour
 
         if (!_interrupted)
         {
-            if (ttsPlayer != null) ttsPlayer.IsSpeaking = true;
+            if (ttsPlayer != null)
+            {
+                ttsPlayer.IsSpeaking = true;
+                TextToSpeechPlayer.SetCurrentSpeech(text);
+            }
             animatorDriver?.TriggerStartTalking();
             EnqueueTTSNarration(text);
             gestureSynchronizer?.ProcessResponse(text);
@@ -453,6 +463,9 @@ public class AITutor : MonoBehaviour
     {
         if (string.IsNullOrWhiteSpace(sentence)) return;
         if (_interrupted) return;
+
+        if (ttsPlayer != null)
+            TextToSpeechPlayer.SetCurrentSpeech(sentence);
 
         int order = _enqueueOrder++;
         StartCoroutine(PrefetchNext(sentence, order));

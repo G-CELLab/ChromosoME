@@ -8,6 +8,9 @@ using UnityEngine;
 /// 
 /// Logs to console and Player_Position.csv with columns:
 /// Time(s), XPos, YPos, ZPos, Raycast
+///
+/// Also caches the most recently computed values via public Last*
+/// properties so CombinedLogger can merge them with the other logs.
 /// </summary>
 public class PlayerPositionLogger : MonoBehaviour
 {
@@ -35,6 +38,11 @@ public class PlayerPositionLogger : MonoBehaviour
     // Cycle tracking
     private int currentCycle = 0;
     private int lastCycle = -1;
+
+    // ── Cached last-frame values (read by CombinedLogger) ──────────────────────
+
+    public Vector3 LastHeadPosition  { get; private set; }
+    public string  LastRaycastTarget { get; private set; } = "";
 
     private void Start()
     {
@@ -130,6 +138,10 @@ public class PlayerPositionLogger : MonoBehaviour
         
         // Cast raycast forward from player head
         string raycastHit = GetRaycastTarget();
+
+        // Cache for CombinedLogger
+        LastHeadPosition  = headPos;
+        LastRaycastTarget = raycastHit;
         
         // Console logging
         if (logToConsole)
@@ -151,7 +163,7 @@ public class PlayerPositionLogger : MonoBehaviour
         if (Physics.Raycast(ray, out RaycastHit hitInfo, raycastDistance, raycastLayerMask))
         {
             Debug.DrawRay(playerHeadTransform.position, playerHeadTransform.TransformDirection(Vector3.forward) * hitInfo.distance, Color.yellow);
-            return hitInfo.collider.gameObject.name;
+            return ColliderNameResolver.ResolveName(hitInfo.collider.transform);
         }
         else
         {
