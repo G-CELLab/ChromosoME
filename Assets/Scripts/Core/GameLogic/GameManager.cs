@@ -104,6 +104,7 @@ public class GameManager : MonoBehaviour
 
     public void CellDivided()
     {
+        IncrementHealingCycle();
         HPtracking = Mathf.Clamp01(HPtracking + 0.333f);
         DrainATP();
         SyncHpBar();
@@ -127,7 +128,6 @@ public class GameManager : MonoBehaviour
             atpSliderImg.fillAmount = Mathf.Clamp01(atpSliderImg.fillAmount - 0.333f);
         }
 
-        // Snap to exactly 0 in case of float drift
         atpSliderImg.fillAmount = 0f;
     }
 
@@ -165,8 +165,18 @@ public class GameManager : MonoBehaviour
     public void Telophase()
     {
         TransitionTo(GameState.Telophase);
+        int cycleBeforeIncrement = healingCycleCount; // capture BEFORE CellDivided increments
         CellDivided();
-        StartCoroutine(DelayedTelophaseAITrigger());
+        StartCoroutine(DelayedTelophaseAITrigger(cycleBeforeIncrement));
+
+        if (IsWoundHealed())
+            StartCoroutine(DelayedGameEnd(3f));
+    }
+
+    private IEnumerator DelayedGameEnd(float delay)
+    {
+        yield return new WaitForSeconds(delay);
+        TransitionTo(GameState.GameOver);
     }
 
     // ── Next Cycle ────────────────────────────────────────────────────────────
@@ -178,7 +188,7 @@ public class GameManager : MonoBehaviour
 
         if (atpSliderImg != null)
             atpSliderImg.fillAmount = 0.0f;
-        
+
         Debug.Log("[GameManager] Scene reset for next cycle.");
     }
 
@@ -215,7 +225,6 @@ public class GameManager : MonoBehaviour
 
         // ── Cycle 1 narration triggers ────────────────────────────────────────
         // Only fires on the first healing cycle (healingCycleCount == 0).
-        // Intro uses a short delay to let the scene settle first.
         // Telophase is handled separately via DelayedTelophaseAITrigger (fires every cycle).
         if (healingCycleCount == 0 && aiTutor != null)
         {
@@ -263,7 +272,7 @@ public class GameManager : MonoBehaviour
         trigger?.Invoke();
     }
 
-    private IEnumerator DelayedTelophaseAITrigger()
+    private IEnumerator DelayedTelophaseAITrigger(int cycleIndex)
     {
         yield return new WaitForSeconds(1.5f);
 
@@ -273,7 +282,7 @@ public class GameManager : MonoBehaviour
             yield break;
         }
 
-        string message = NarrationLines.GetTelophase(healingCycleCount);
+        string message = NarrationLines.GetTelophase(cycleIndex);
         if (!string.IsNullOrEmpty(message))
             aiTutor.SpeakNarration(message);
     }

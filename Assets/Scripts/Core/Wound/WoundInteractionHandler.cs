@@ -78,21 +78,10 @@ public class WoundInteractionHandler : MonoBehaviour
         isFinished = true;
         loadingCircle.Reset();
 
-        if (GameManager.eGameStatus == GameManager.GameState.Telophase)
-        {
-            GameManager.IncrementHealingCycle();
+        // Block transition if GameOver is already triggered or pending
+        if (GameManager.eGameStatus == GameManager.GameState.GameOver) return;
+        if (GameManager.IsWoundHealed()) return; // 3rd cycle telophase — GameManager handles it
 
-            if (GameManager.IsWoundHealed())
-            {
-                Debug.Log("[WoundInteractionHandler] Wound fully healed — ending game.");
-                gameManager?.GameEnd();
-                return;
-            }
-
-            Debug.Log($"[WoundInteractionHandler] Cycle {GameManager.GetHealingCycleCount()}/{GameManager.MAX_HEALING_CYCLES} complete. HP: {GameManager.HPtracking}");
-        }
-
-        Debug.Log("[WoundInteractionHandler] Transitioning to Interphase.");
         StartCoroutine(FadeAndTransition());
     }
 

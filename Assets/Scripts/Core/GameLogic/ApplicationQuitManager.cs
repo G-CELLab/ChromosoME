@@ -10,9 +10,18 @@ public class ApplicationQuitHandler : MonoBehaviour
     public LoadingCircle loadingCircle;
 
     private bool handDetected = false;
+    private bool quitRequested = false;
+
+    private void OnEnable()
+    {
+        handDetected = false;
+        quitRequested = false;
+        loadingCircle?.Reset();
+    }
 
     private void OnTriggerEnter(Collider other)
     {
+        if (GameManager.eGameStatus != GameManager.GameState.GameOver) return;
         if (other.CompareTag("Left") || other.CompareTag("Right"))
             handDetected = true;
     }
@@ -28,9 +37,18 @@ public class ApplicationQuitHandler : MonoBehaviour
 
     private void Update()
     {
+        if (GameManager.eGameStatus != GameManager.GameState.GameOver)
+        {
+            if (handDetected) handDetected = false;
+            if (loadingCircle != null) loadingCircle.Reset();
+            return;
+        }
+
+        if (quitRequested) return;
         if (!handDetected) return;
         if (loadingCircle.Tick(Time.deltaTime))
         {
+            quitRequested = true;
             Debug.Log("[ApplicationQuitHandler] Quitting application.");
             Application.Quit();
         }

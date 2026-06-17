@@ -20,6 +20,7 @@ public class ResetManager : MonoBehaviour
     private class ObjectState
     {
         public GameObject obj;
+        public Transform originalParent;
         public Vector3 localPosition;
         public Quaternion localRotation;
         public Vector3 localScale;
@@ -49,6 +50,7 @@ public class ResetManager : MonoBehaviour
         savedStates.Add(new ObjectState
         {
             obj           = t.gameObject,
+            originalParent = t.parent,
             localPosition = t.localPosition,
             localRotation = t.localRotation,
             localScale    = t.localScale,
@@ -82,6 +84,13 @@ public class ResetManager : MonoBehaviour
         foreach (var state in savedStates)
         {
             if (state.obj == null) continue;
+            
+            // Reparent to original parent if it's been moved
+            if (state.obj.transform.parent != state.originalParent)
+            {
+                state.obj.transform.SetParent(state.originalParent);
+            }
+            
             state.obj.transform.localPosition = state.localPosition;
             state.obj.transform.localRotation = state.localRotation;
             state.obj.transform.localScale    = state.localScale;

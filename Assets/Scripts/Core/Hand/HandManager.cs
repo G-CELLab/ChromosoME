@@ -1,5 +1,6 @@
 using UnityEngine;
 using UnityEngine.XR.Interaction.Toolkit.Interactors;
+using System.Collections;
 using System.Collections.Generic;
 using UnityEngine.XR.Hands;
 using Unity.XR.CoreUtils;
@@ -34,6 +35,8 @@ public class HandManager : MonoBehaviour, IPhaseController
     private Quaternion lastValidWorldRot;
     private bool hasEverBeenTracked = false;
     private bool isManualSelecting = false;
+    private float grabCooldownUntil = 0f; // blocks auto-grab after any release
+    private bool releaseCycleRunning = false;
 
     // ── Lifecycle ─────────────────────────────────────────────────────────────
 
@@ -92,15 +95,37 @@ public class HandManager : MonoBehaviour, IPhaseController
     {
         if (handInteractor == null) return;
 
-        if (!HasCurrentSelection())
+        isManualSelecting = false;
+        grabCooldownUntil = Time.time + 0.5f; // suppress auto-grab after any release
+
+        if (HasCurrentSelection())
         {
-            isManualSelecting = false;
-            return;
+            try { handInteractor.EndManualInteraction(); }
+            catch (System.Exception) { }
+
+            try
+            {
+                var mgr = handInteractor.interactionManager;
+                if (mgr != null)
+                    mgr.CancelInteractorSelection(
+                        (UnityEngine.XR.Interaction.Toolkit.Interactors.IXRSelectInteractor)handInteractor);
+            }
+            catch (System.Exception) { }
         }
 
-        try { handInteractor.EndManualInteraction(); }
-        catch (System.Exception) { /* interactable was destroyed, nothing to release */ }
-        finally { isManualSelecting = false; }
+        // Disable/re-enable flushes ALL XR toolkit internal state including
+        // stale selection entries left behind when interactables disappear mid-grab
+        if (!releaseCycleRunning)
+            StartCoroutine(CycleInteractorEnabled());
+    }
+
+    private IEnumerator CycleInteractorEnabled()
+    {
+        releaseCycleRunning = true;
+        handInteractor.enabled = false;
+        yield return null; // one frame is enough for XR to flush internal state
+        handInteractor.enabled = true;
+        releaseCycleRunning = false;
     }
 
     // ── Setup ─────────────────────────────────────────────────────────────────
@@ -152,12 +177,38 @@ public class HandManager : MonoBehaviour, IPhaseController
 
         if (!active)
         {
-            ForceRelease();
+            // Always clear selection when fist is open, even if selection did not
+            // originate from our manual path (stale toolkit state / auto selection).
+            if (isManualSelecting || HasCurrentSelection())
+                ForceRelease(); // already sets cooldown
             return;
         }
 
+        // Cooldown period — don't grab anything yet.
+        // If toolkit selected something anyway, immediately clear it.
+        if (Time.time < grabCooldownUntil)
+        {
+            if (HasCurrentSelection())
+                ForceRelease();
+            return;
+        }
+
+        // Object disappeared under us (e.g. nutrient collected while held)
+        // Set cooldown so we don't immediately snap to the next nearby object
         if (isManualSelecting && !HasCurrentSelection())
+        {
             isManualSelecting = false;
+            grabCooldownUntil = Time.time + 0.5f;
+            return;
+        }
+
+        // If toolkit auto-selected while we were not in manual mode, clear it and
+        // wait for a clean fist-triggered manual interaction.
+        if (!isManualSelecting && HasCurrentSelection())
+        {
+            ForceRelease();
+            return;
+        }
 
         if (!isManualSelecting)
         {
@@ -176,7 +227,9 @@ public class HandManager : MonoBehaviour, IPhaseController
 
     private bool HasCurrentSelection()
     {
-        return handInteractor != null && handInteractor.interactablesSelected != null && handInteractor.interactablesSelected.Count > 0;
+        return handInteractor != null
+            && handInteractor.interactablesSelected != null
+            && handInteractor.interactablesSelected.Count > 0;
     }
 
     // ── Hand Tracking ─────────────────────────────────────────────────────────
@@ -246,8 +299,9 @@ public class HandManager : MonoBehaviour, IPhaseController
             if (s.running) { handSubsystem = s; return; }
         }
     }
-    // ── Public API ───────────────────────────────────────────────────────────
-    // Allows external scripts (like GameManager) to enable/disable hand interactivity (e.g. while narration is in progress)
+
+    // ── Public API ────────────────────────────────────────────────────────────
+
     public void SetInteractionEnabled(bool enabled)
     {
         if (handInteractor != null)

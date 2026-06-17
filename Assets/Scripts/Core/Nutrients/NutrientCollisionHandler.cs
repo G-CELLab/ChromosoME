@@ -1,4 +1,5 @@
 using UnityEngine;
+using UnityEngine.XR.Interaction.Toolkit.Interactables;
 
 /// <summary>
 /// Handles nutrient collection during Interphase.
@@ -75,6 +76,7 @@ public class NutrientCollisionHandler : MonoBehaviour, IPhaseController
             {
                 proteinCollected = true;
                 gameManager?.NutrientCollision();
+                CancelSelectionBeforeDisable(protein);
                 protein.SetActive(false);
                 Debug.Log("[NutrientCollisionHandler] Protein collected.");
             }
@@ -86,6 +88,7 @@ public class NutrientCollisionHandler : MonoBehaviour, IPhaseController
             {
                 magnesiumCollected = true;
                 gameManager?.NutrientCollision();
+                CancelSelectionBeforeDisable(magnesium);
                 magnesium.SetActive(false);
                 Debug.Log("[NutrientCollisionHandler] Magnesium collected.");
             }
@@ -97,6 +100,7 @@ public class NutrientCollisionHandler : MonoBehaviour, IPhaseController
             {
                 vitaminCCollected = true;
                 gameManager?.NutrientCollision();
+                CancelSelectionBeforeDisable(vitaminC);
                 vitaminC.SetActive(false);
                 Debug.Log("[NutrientCollisionHandler] Vitamin C collected.");
             }
@@ -140,6 +144,19 @@ public class NutrientCollisionHandler : MonoBehaviour, IPhaseController
         }
 
         return false;
+    }
+
+    private void CancelSelectionBeforeDisable(GameObject nutrient)
+    {
+        if (nutrient == null) return;
+
+        var grab = nutrient.GetComponent<XRGrabInteractable>();
+        if (grab == null) return;
+
+        var manager = grab.interactionManager;
+        if (manager == null) return;
+
+        manager.CancelInteractableSelection((UnityEngine.XR.Interaction.Toolkit.Interactables.IXRSelectInteractable)grab);
     }
 
     private void ResetState()
