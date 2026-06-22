@@ -159,6 +159,8 @@ public class AITutor : MonoBehaviour
 
     public bool IsProcessing => _isProcessing;
 
+    public bool IsNarrating => _isNarrating;
+
     /// <summary>
     /// Speaks a fixed narration string directly through TTS without going
     /// through OpenAI. Narration strings live in NarrationLines.cs.
