@@ -2,7 +2,6 @@
 
 ## Global Scene Rules
 - The AI agent is present the entire time.
-- The instruction text box is present on the right side throughout the simulation.
 - The tutor should explain what is happening now and what to do next when asked.
 - If the learner asks about another phase, answer faithfully even if current phase is different.
 

@@ -2,9 +2,6 @@ using UnityEngine;
 
 public class CellParticleController : MonoBehaviour
 {
-    [Header("Pause Settings")]
-    [SerializeField] private float pauseSpeedMultiplier = 0f; // 0 = full freeze
-
     private ParticleSystem _ps;
     private bool _paused = false;
 

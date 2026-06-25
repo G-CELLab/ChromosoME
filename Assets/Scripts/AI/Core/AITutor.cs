@@ -86,7 +86,7 @@ public class AITutor : MonoBehaviour
     private int  _prefetchInFlight = 0;
     private int  _enqueueOrder     = 0;
     private int  _playbackOrder    = 0;
-    private string _pendingNarration = null;
+    private readonly Queue<string> _pendingNarrations = new Queue<string>();
 
     private readonly SortedDictionary<int, AudioClip> _orderedClipQueue
         = new SortedDictionary<int, AudioClip>();
@@ -174,7 +174,7 @@ public class AITutor : MonoBehaviour
         if (_isProcessing)
         {
             Debug.Log("[AITutor] Narration queued — will play after current response.");
-            _pendingNarration = text;
+            _pendingNarrations.Enqueue(text);
             return;
         }
 
@@ -336,6 +336,10 @@ public class AITutor : MonoBehaviour
             else
                 Debug.Log("[AITutor] Narration complete — gate released.");
         }
+        
+        // ── drain pending narrations ──────────────────────────────────────────
+        if (!_interrupted && _pendingNarrations.Count > 0)
+            SpeakNarration(_pendingNarrations.Dequeue());
     }
 
     private void EnqueueTTSNarration(string text)
@@ -448,12 +452,8 @@ public class AITutor : MonoBehaviour
                 Debug.Log("[AITutor] Processing gate released.");
         }
 
-        if (ttsCompleted && !string.IsNullOrEmpty(_pendingNarration))
-        {
-            string pending    = _pendingNarration;
-            _pendingNarration = null;
-            SpeakNarration(pending);
-        }
+        if (ttsCompleted && _pendingNarrations.Count > 0)
+            SpeakNarration(_pendingNarrations.Dequeue());
 
         if (ttsCompleted)
             OnResponseCompleted.Invoke(fullResponse);

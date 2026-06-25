@@ -9,18 +9,14 @@ public class FadeScreen : MonoBehaviour
 
     private void Awake()
     {
+        gameObject.SetActive(true);
         rend = GetComponent<Renderer>();
         SetAlpha(0f);
-        gameObject.layer = LayerMask.NameToLayer("Agent");
-
-        if (transform.parent != null)
-            transform.SetParent(null, true);
-
-        DontDestroyOnLoad(gameObject); // survive scene reloads
     }
 
     public void StartFadeToClear()
     {
+        gameObject.SetActive(true);
         StartCoroutine(FadeToClear());
     }
 
@@ -28,17 +24,16 @@ public class FadeScreen : MonoBehaviour
     {
         gameObject.SetActive(true);
         rend = GetComponent<Renderer>();
+        rend.material = new Material(rend.material);
         SetAlpha(0f);
         yield return FadeRoutine(0f, 1f);
     }
 
     public IEnumerator FadeToClear()
     {
-        gameObject.SetActive(true);
         rend = GetComponent<Renderer>();
         SetAlpha(1f);
         yield return FadeRoutine(1f, 0f);
-        gameObject.SetActive(false);
     }
 
     private IEnumerator FadeRoutine(float from, float to)
@@ -55,6 +50,7 @@ public class FadeScreen : MonoBehaviour
 
     private void SetAlpha(float alpha)
     {
+        if (rend == null) rend = GetComponent<Renderer>();
         Color c = fadeColor;
         c.a = alpha;
         rend.material.SetColor("_BaseColor", c);

@@ -3,16 +3,10 @@ using UnityEngine;
 using UnityEngine.Rendering;
 using UnityEngine.Rendering.Universal;
 
-/// <summary>
-/// Controls the narration lock state — darkens the scene via post-processing,
-/// disables hand interaction and colliders, dims world space UI, and pauses
-/// the active ghost hand hint.
-/// Called by AITutor at the start and end of narration.
-/// </summary>
 public class NarrationLockController : MonoBehaviour
 {
     [Header("References")]
-    [SerializeField] private Volume      globalVolume;
+    [SerializeField] private Volume globalVolume;
     [SerializeField] private HandManager leftHand;
     [SerializeField] private HandManager rightHand;
 
@@ -23,25 +17,21 @@ public class NarrationLockController : MonoBehaviour
     [Header("Darkening Settings")]
     [SerializeField] private float targetExposure = -1.5f;
     [SerializeField] private float targetVignette = 0.45f;
-    [SerializeField] private float fadeDuration   = 0.8f;
+    [SerializeField] private float fadeDuration = 0.8f;
 
     [Header("World Space UI")]
-    [Tooltip("Add a CanvasGroup component to each World Space Canvas, then assign them here.")]
     [SerializeField] private CanvasGroup[] worldSpaceUI;
     [SerializeField] private float uiDimmedAlpha = 0.25f;
 
-    // ── Post Processing ───────────────────────────────────────────────────────
+    [Header("Wound Handlers")]
+    [SerializeField] private MonoBehaviour[] woundHandlers;
 
     private ColorAdjustments _colorAdjustments;
-    private Vignette         _vignette;
-    private Coroutine        _fadeCoroutine;
-
-    // ── Hand Colliders ────────────────────────────────────────────────────────
-
+    private Vignette _vignette;
+    private Coroutine _fadeCoroutine;
     private Collider[] _leftColliders;
     private Collider[] _rightColliders;
-
-    // ── Lifecycle ─────────────────────────────────────────────────────────────
+    private IWoundHandler[] _woundHandlers;
 
     private void Awake()
     {
@@ -55,23 +45,29 @@ public class NarrationLockController : MonoBehaviour
         }
 
         if (_colorAdjustments == null)
-            Debug.LogWarning("[NarrationLockController] ColorAdjustments override not found on Volume Profile.");
+            Debug.LogWarning("[NarrationLockController] ColorAdjustments not found.");
         if (_vignette == null)
-            Debug.LogWarning("[NarrationLockController] Vignette override not found on Volume Profile.");
+            Debug.LogWarning("[NarrationLockController] Vignette not found.");
 
         if (leftHandRoot != null)
             _leftColliders = leftHandRoot.GetComponentsInChildren<Collider>();
         if (rightHandRoot != null)
             _rightColliders = rightHandRoot.GetComponentsInChildren<Collider>();
+
+        _woundHandlers = new IWoundHandler[woundHandlers != null ? woundHandlers.Length : 0];
+        for (int i = 0; i < _woundHandlers.Length; i++)
+            _woundHandlers[i] = woundHandlers[i] as IWoundHandler;
     }
 
-    // ── Public API ────────────────────────────────────────────────────────────
+    public bool IsLocked { get; private set; } = false;
 
     public void Lock()
     {
         IsLocked = true;
         DisableHands();
         SetHandCollidersEnabled(false);
+        foreach (var w in _woundHandlers)
+            w?.OnNarrationLock();
         PauseActiveHint();
 
         if (_fadeCoroutine != null) StopCoroutine(_fadeCoroutine);
@@ -82,9 +78,11 @@ public class NarrationLockController : MonoBehaviour
 
     public void Unlock()
     {
-        IsLocked = false;
         EnableHands();
+        foreach (var w in _woundHandlers)
+            w?.OnNarrationLock(); // also clear on unlock so hand must re-enter
         SetHandCollidersEnabled(true);
+        IsLocked = false;
         ResumeActiveHint();
 
         if (_fadeCoroutine != null) StopCoroutine(_fadeCoroutine);
@@ -92,10 +90,6 @@ public class NarrationLockController : MonoBehaviour
 
         Debug.Log("[NarrationLockController] 🔓 Unlocked.");
     }
-
-    public bool IsLocked { get; private set; } = false;
-
-    // ── Hands ─────────────────────────────────────────────────────────────────
 
     private void DisableHands()
     {
@@ -117,8 +111,6 @@ public class NarrationLockController : MonoBehaviour
             foreach (var c in _rightColliders) c.enabled = enabled;
     }
 
-    // ── Ghost Hand Hint ───────────────────────────────────────────────────────
-
     private void PauseActiveHint()
     {
         var hint = FindAnyObjectByType<GhostHandHint>();
@@ -131,14 +123,10 @@ public class NarrationLockController : MonoBehaviour
         hint?.ResumeHint();
     }
 
-    // ── Fade ──────────────────────────────────────────────────────────────────
-
     private IEnumerator FadeAll(float toExposure, float toVignette, float toUIAlpha)
     {
-        float fromExposure = _colorAdjustments != null
-            ? _colorAdjustments.postExposure.value : 0f;
-        float fromVignette = _vignette != null
-            ? _vignette.intensity.value : 0f;
+        float fromExposure = _colorAdjustments != null ? _colorAdjustments.postExposure.value : 0f;
+        float fromVignette = _vignette != null ? _vignette.intensity.value : 0f;
 
         float[] fromAlphas = new float[worldSpaceUI != null ? worldSpaceUI.Length : 0];
         if (worldSpaceUI != null)
@@ -149,7 +137,7 @@ public class NarrationLockController : MonoBehaviour
         while (elapsed < fadeDuration)
         {
             elapsed += Time.deltaTime;
-            float t  = Mathf.Clamp01(elapsed / fadeDuration);
+            float t = Mathf.Clamp01(elapsed / fadeDuration);
 
             if (_colorAdjustments != null)
                 _colorAdjustments.postExposure.value = Mathf.Lerp(fromExposure, toExposure, t);

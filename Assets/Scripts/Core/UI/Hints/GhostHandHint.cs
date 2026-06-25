@@ -36,6 +36,7 @@ public class GhostHandHint : MonoBehaviour
     public void PauseHint()
     {
         isPaused = true;
+        playerHandInside = false; // Reset to ensure it fades back in when resumed
         if (animator != null) animator.speed = 0f;
         if (hintCollider != null) hintCollider.enabled = false;
         Debug.Log("[GhostHandHint] Paused.");
