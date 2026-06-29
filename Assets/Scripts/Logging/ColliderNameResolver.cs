@@ -16,7 +16,19 @@ public static class ColliderNameResolver
     // walk up to its parent and try again instead of returning it.
     private static readonly string[] GenericNameFragments =
     {
-        "collider", "trigger", "hitbox", "hit box"
+        "collider", "trigger", "hitbox", "hit box",
+        // XR rig hierarchy objects — not meaningful touch targets
+        "xr origin", "xr rig", "xrorigin", "xrrig"
+    };
+
+    // Position marker names — these are invisible target/anchor objects used
+    // by gameplay logic and should never appear in the logs. If the entire
+    // ancestor chain resolves to one of these, we return "" so the raycast
+    // and touch columns treat it as a miss.
+    private static readonly string[] PositionMarkerFragments =
+    {
+        "position", "chromepos", "chromeposi", "tidpos", "tidposi",
+        "centriolepos", "centrioleposi"
     };
 
     /// <summary>
@@ -24,6 +36,7 @@ public static class ColliderNameResolver
     /// names first, then skipping past generic placeholder names until it
     /// finds a transform whose name actually describes the object
     /// (e.g. "Wound", "RedChromatidL", "BlueDNA1").
+    /// Returns "" if the resolved name is a position marker.
     /// Returns the original transform's name if nothing better is found.
     /// </summary>
     public static string ResolveName(Transform start)
@@ -40,10 +53,21 @@ public static class ColliderNameResolver
             if (lower.Contains("vitamin"))   return "VitaminC";
 
             if (!IsGenericName(lower))
+            {
+                // Found a descriptive name — reject it if it's a position marker
+                if (IsPositionMarker(lower))
+                    return "";
+
                 return current.name;
+            }
 
             current = current.parent;
         }
+
+        // Fallback — check the original name one last time before returning it
+        string fallbackLower = start.name.ToLowerInvariant();
+        if (IsPositionMarker(fallbackLower))
+            return "";
 
         return start.name;
     }
@@ -51,6 +75,13 @@ public static class ColliderNameResolver
     private static bool IsGenericName(string lower)
     {
         foreach (var fragment in GenericNameFragments)
+            if (lower.Contains(fragment)) return true;
+        return false;
+    }
+
+    private static bool IsPositionMarker(string lower)
+    {
+        foreach (var fragment in PositionMarkerFragments)
             if (lower.Contains(fragment)) return true;
         return false;
     }

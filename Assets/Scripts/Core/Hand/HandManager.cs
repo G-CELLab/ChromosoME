@@ -4,6 +4,7 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine.XR.Hands;
 using Unity.XR.CoreUtils;
+using System;
 
 /// <summary>
 /// Manages hand tracking, fist detection, and XRI selection for one hand.
@@ -35,8 +36,21 @@ public class HandManager : MonoBehaviour, IPhaseController
     private Quaternion lastValidWorldRot;
     private bool hasEverBeenTracked = false;
     private bool isManualSelecting = false;
-    private float grabCooldownUntil = 0f; // blocks auto-grab after any release
+    private float grabCooldownUntil = 0f;
     private bool releaseCycleRunning = false;
+
+    // Tracks the last frame's grab state so we can detect the falling edge
+    private bool wasGrabbed = false;
+
+    // ── Public Events ─────────────────────────────────────────────────────────
+
+    /// <summary>
+    /// Fired on the frame isGrabbed transitions from true to false.
+    /// The string argument is the name of the object that was held,
+    /// resolved via ColliderNameResolver before the selection clears.
+    /// Empty string if nothing identifiable was held.
+    /// </summary>
+    public event Action<string> OnGrabReleased;
 
     // ── Lifecycle ─────────────────────────────────────────────────────────────
 
@@ -45,7 +59,7 @@ public class HandManager : MonoBehaviour, IPhaseController
 
     void Start()
     {
-        xrOrigin = Object.FindAnyObjectByType<XROrigin>();
+        xrOrigin = UnityEngine.Object.FindAnyObjectByType<XROrigin>();
         EnsureInteractorReference();
         ConfigureInteractorInput();
         FindVisualPalm();
@@ -78,6 +92,14 @@ public class HandManager : MonoBehaviour, IPhaseController
         }
 
         bool gestureActive = EvaluateClosedFist();
+
+        // Detect grab release — fire event before UpdateXRISelection clears
+        // the interactor's selection so GetHeldObjectName() still works.
+        if (wasGrabbed && !gestureActive)
+            FireGrabReleased();
+
+        wasGrabbed = gestureActive;
+
         UpdateXRISelection(gestureActive);
         isGrabbed = gestureActive;
     }
@@ -96,7 +118,7 @@ public class HandManager : MonoBehaviour, IPhaseController
         if (handInteractor == null) return;
 
         isManualSelecting = false;
-        grabCooldownUntil = Time.time + 0.5f; // suppress auto-grab after any release
+        grabCooldownUntil = Time.time + 0.5f;
 
         if (HasCurrentSelection())
         {
@@ -113,8 +135,6 @@ public class HandManager : MonoBehaviour, IPhaseController
             catch (System.Exception) { }
         }
 
-        // Disable/re-enable flushes ALL XR toolkit internal state including
-        // stale selection entries left behind when interactables disappear mid-grab
         if (!releaseCycleRunning)
             StartCoroutine(CycleInteractorEnabled());
     }
@@ -123,7 +143,7 @@ public class HandManager : MonoBehaviour, IPhaseController
     {
         releaseCycleRunning = true;
         handInteractor.enabled = false;
-        yield return null; // one frame is enough for XR to flush internal state
+        yield return null;
         handInteractor.enabled = true;
         releaseCycleRunning = false;
     }
@@ -177,15 +197,11 @@ public class HandManager : MonoBehaviour, IPhaseController
 
         if (!active)
         {
-            // Always clear selection when fist is open, even if selection did not
-            // originate from our manual path (stale toolkit state / auto selection).
             if (isManualSelecting || HasCurrentSelection())
-                ForceRelease(); // already sets cooldown
+                ForceRelease();
             return;
         }
 
-        // Cooldown period — don't grab anything yet.
-        // If toolkit selected something anyway, immediately clear it.
         if (Time.time < grabCooldownUntil)
         {
             if (HasCurrentSelection())
@@ -193,8 +209,6 @@ public class HandManager : MonoBehaviour, IPhaseController
             return;
         }
 
-        // Object disappeared under us (e.g. nutrient collected while held)
-        // Set cooldown so we don't immediately snap to the next nearby object
         if (isManualSelecting && !HasCurrentSelection())
         {
             isManualSelecting = false;
@@ -202,8 +216,6 @@ public class HandManager : MonoBehaviour, IPhaseController
             return;
         }
 
-        // If toolkit auto-selected while we were not in manual mode, clear it and
-        // wait for a clean fist-triggered manual interaction.
         if (!isManualSelecting && HasCurrentSelection())
         {
             ForceRelease();
@@ -230,6 +242,76 @@ public class HandManager : MonoBehaviour, IPhaseController
         return handInteractor != null
             && handInteractor.interactablesSelected != null
             && handInteractor.interactablesSelected.Count > 0;
+    }
+
+    // ── Grab Release ──────────────────────────────────────────────────────────
+
+    private void FireGrabReleased()
+    {
+        string heldName = GetHeldObjectName();
+        OnGrabReleased?.Invoke(heldName);
+    }
+
+    /// <summary>
+    /// Returns the ColliderNameResolver display name of the currently held
+    /// object, or "" if nothing is held or the name cannot be resolved.
+    /// Safe to call from OnGrabReleased listeners — fires before selection clears.
+    /// </summary>
+    public string GetHeldObjectName()
+    {
+        if (handInteractor == null) return "";
+
+        var selected = handInteractor.interactablesSelected;
+        if (selected == null || selected.Count == 0) return "";
+
+        var interactable = selected[0];
+        if (interactable == null) return "";
+
+        Transform t = (interactable as UnityEngine.XR.Interaction.Toolkit.Interactables.XRBaseInteractable)?.transform
+                   ?? (interactable as Component)?.transform;
+
+        if (t == null) return "";
+
+        return ColliderNameResolver.ResolveName(t);
+    }
+
+    /// <summary>
+    /// Returns the world-space position of the currently held object,
+    /// or Vector3.zero if nothing is held.
+    /// </summary>
+    public Vector3 GetHeldObjectPosition()
+    {
+        if (handInteractor == null) return Vector3.zero;
+
+        var selected = handInteractor.interactablesSelected;
+        if (selected == null || selected.Count == 0) return Vector3.zero;
+
+        var interactable = selected[0];
+        Transform t = (interactable as UnityEngine.XR.Interaction.Toolkit.Interactables.XRBaseInteractable)?.transform
+                   ?? (interactable as Component)?.transform;
+
+        return t != null ? t.position : Vector3.zero;
+    }
+
+    /// <summary>
+    /// Returns the Bounds of the currently held object's first collider,
+    /// or an empty Bounds at Vector3.zero if nothing is held.
+    /// </summary>
+    public Bounds GetHeldObjectBounds()
+    {
+        if (handInteractor == null) return new Bounds();
+
+        var selected = handInteractor.interactablesSelected;
+        if (selected == null || selected.Count == 0) return new Bounds();
+
+        var interactable = selected[0];
+        Transform t = (interactable as UnityEngine.XR.Interaction.Toolkit.Interactables.XRBaseInteractable)?.transform
+                   ?? (interactable as Component)?.transform;
+
+        if (t == null) return new Bounds();
+
+        Collider col = t.GetComponentInChildren<Collider>();
+        return col != null ? col.bounds : new Bounds(t.position, Vector3.one * 0.1f);
     }
 
     // ── Hand Tracking ─────────────────────────────────────────────────────────
@@ -287,7 +369,6 @@ public class HandManager : MonoBehaviour, IPhaseController
                     curled++;
         }
 
-        // At least 3 fingers curled = closed fist
         return curled >= 3;
     }
 

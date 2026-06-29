@@ -16,6 +16,8 @@ using UnityEngine.Networking;
 ///   - Barge-in / interrupt logic stripped (AITutor handles response gating)
 ///   - OnSpeechStarted event added — fires as soon as VAD detects speech begin
 ///     so AITutor can stop TTS immediately without waiting for the transcript
+///   - Permission check now polls until granted rather than failing immediately
+///     on first launch when the user hasn't responded to the dialog yet
 /// </summary>
 public class OpenAISpeechRecognizer : MonoBehaviour
 {
@@ -47,6 +49,10 @@ public class OpenAISpeechRecognizer : MonoBehaviour
     [Header("TTS Self-Interrupt Protection")]
     [Tooltip("Window after TTS starts during which mic input is ignored (prevents echo triggering VAD)")]
     public float ttsProtectionSec = 0.8f;
+
+    [Header("Permission")]
+    [Tooltip("How long to wait for the user to respond to the microphone permission dialog (seconds)")]
+    public float permissionTimeoutSec = 30f;
 
     [Header("Debug")]
     public bool showDebugOverlay = true;
@@ -110,19 +116,31 @@ public class OpenAISpeechRecognizer : MonoBehaviour
 
     private IEnumerator InitAndLoop()
     {
-    #if UNITY_ANDROID && !UNITY_EDITOR
-        yield return null;
-        if (!PermissionManager.HasMicrophonePermission())
+#if UNITY_ANDROID && !UNITY_EDITOR
+        // Permission.RequestUserPermission() is asynchronous — it shows the
+        // dialog and returns immediately without waiting for the user's answer.
+        // On first launch HasMicrophonePermission() will be false until the
+        // user taps Allow, which can take several seconds. We poll every frame
+        // until granted rather than checking once and disabling permanently.
+        float permElapsed = 0f;
+        while (!PermissionManager.HasMicrophonePermission())
         {
-            Debug.LogError("[Recognizer] Microphone permission not granted.");
-            enabled = false;
-            yield break;
+            if (permElapsed >= permissionTimeoutSec)
+            {
+                Debug.LogError($"[Recognizer] Microphone permission not granted after {permissionTimeoutSec}s — speech recognition disabled.");
+                enabled = false;
+                yield break;
+            }
+            permElapsed += Time.deltaTime;
+            yield return null;
         }
-    #endif
+        Debug.Log("[Recognizer] Microphone permission granted.");
+#endif
+
         if (Microphone.devices.Length == 0)
         {
             Debug.LogError("[Recognizer] No microphone detected.");
-            yield break; 
+            yield break;
         }
 
         Debug.Log($"[Recognizer] Found {Microphone.devices.Length} microphone(s):");
@@ -286,8 +304,8 @@ public class OpenAISpeechRecognizer : MonoBehaviour
                             silenceTimer = 0f;
                             D("[VAD] Speech started");
 
-                            // ── Fire immediately so AITutor can stop TTS now,
-                            //    before waiting for the full transcript ──────
+                            // Fire immediately so AITutor can stop TTS now,
+                            // before waiting for the full transcript.
                             OnSpeechStarted?.Invoke();
                         }
                     }

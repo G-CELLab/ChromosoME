@@ -48,6 +48,9 @@ public class CombinedLogger : MonoBehaviour
     private int currentCycle = 0;
     private int lastCycle = -1;
 
+    // Phase tracking for Telophase-aware rollover
+    private string lastPhaseValue = "";
+
     private void Start()
     {
         if (logToConsole)
@@ -107,8 +110,17 @@ public class CombinedLogger : MonoBehaviour
     // already run their Update() and cached this frame's values.
     private void LateUpdate()
     {
+        // Roll over to a new CSV when the phase transitions into Interphase
+        // after Telophase — NOT when healingCycleCount increments, because
+        // CellDivided() increments the counter in the same frame as the
+        // Telophase transition and would open a new file mid-Telophase.
         currentCycle = GameManager.GetHealingCycleCount();
-        if (currentCycle != lastCycle && currentCycle < GameManager.MAX_HEALING_CYCLES)
+        string currentPhase = mainLogger.LastPhase;
+        bool enteringNewCycle = lastPhaseValue == "Telophase"
+                             && currentPhase == "Interphase"
+                             && currentCycle != lastCycle
+                             && currentCycle < GameManager.MAX_HEALING_CYCLES;
+        if (enteringNewCycle)
         {
             lastCycle = currentCycle;
             if (logToCSV)
@@ -118,6 +130,7 @@ public class CombinedLogger : MonoBehaviour
                     Debug.Log($"[CombinedLogger] Started new cycle {currentCycle + 1}");
             }
         }
+        lastPhaseValue = currentPhase;
 
         timeSinceLastLog += Time.deltaTime;
         if (timeSinceLastLog >= loggingInterval)

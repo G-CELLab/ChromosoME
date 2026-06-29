@@ -16,7 +16,7 @@ public class HandPositionLogger : MonoBehaviour
     [SerializeField] private Transform rightHandTransform;
     
     [Header("Logging Settings")]
-    [SerializeField] private float loggingInterval = 0.1f; // Log every 0.1 seconds
+    [SerializeField] private float loggingInterval = 0.1f;
     [SerializeField] private bool logToConsole = false;
     [SerializeField] private bool logToCSV = true;
     
@@ -32,6 +32,9 @@ public class HandPositionLogger : MonoBehaviour
     private int currentCycle = 0;
     private int lastCycle = -1;
 
+    // Phase tracking for Telophase-aware rollover
+    private string lastPhaseValue = "";
+
     // ── Cached last-frame values (read by CombinedLogger) ──────────────────────
 
     public Vector3 LastLeftPosition  { get; private set; }
@@ -40,9 +43,7 @@ public class HandPositionLogger : MonoBehaviour
     private void Start()
     {
         if (logToConsole)
-        {
             Debug.Log("[HandPositionLogger] START called");
-        }
         
         if (leftHandTransform == null || rightHandTransform == null)
         {
@@ -64,7 +65,6 @@ public class HandPositionLogger : MonoBehaviour
             Debug.Log("[HandPositionLogger] Found Right Hand: " + rightHandTransform.name);
         }
 
-        // Setup initial CSV file path
         if (logToCSV)
         {
             currentCycle = GameManager.GetHealingCycleCount();
@@ -73,9 +73,7 @@ public class HandPositionLogger : MonoBehaviour
         }
 
         if (logToConsole)
-        {
             Debug.Log("[HandPositionLogger] Initialized. Logging to: " + csvFilePath);
-        }
     }
 
     private void OnDisable()
@@ -89,23 +87,29 @@ public class HandPositionLogger : MonoBehaviour
 
     private void Update()
     {
-        // Check if cycle changed and create new CSV file if needed
+        // Roll over to a new CSV when the phase transitions into Interphase
+        // after Telophase — NOT when healingCycleCount increments, because
+        // CellDivided() increments the counter in the same frame as the
+        // Telophase transition and would open a new file mid-Telophase.
         currentCycle = GameManager.GetHealingCycleCount();
-        if (currentCycle != lastCycle && currentCycle < GameManager.MAX_HEALING_CYCLES)
+        string currentPhase = GameManager.eGameStatus.ToString();
+        bool enteringNewCycle = lastPhaseValue == "Telophase"
+                             && currentPhase == "Interphase"
+                             && currentCycle != lastCycle
+                             && currentCycle < GameManager.MAX_HEALING_CYCLES;
+        if (enteringNewCycle)
         {
             lastCycle = currentCycle;
             if (logToCSV)
             {
                 InitializeCSVFile();
                 if (logToConsole)
-                {
                     Debug.Log($"[HandPositionLogger] Started new cycle {currentCycle + 1}");
-                }
             }
         }
-        
-        timeSinceLastLog += Time.deltaTime;
+        lastPhaseValue = currentPhase;
 
+        timeSinceLastLog += Time.deltaTime;
         if (timeSinceLastLog >= loggingInterval)
         {
             LogHandPositions();
@@ -120,7 +124,6 @@ public class HandPositionLogger : MonoBehaviour
 
         float elapsed = Time.time - sessionStartTime;
 
-        // Get hand positions
         Vector3 leftPos = leftHandTransform.position;
         Vector3 rightPos = rightHandTransform.position;
 
@@ -128,37 +131,26 @@ public class HandPositionLogger : MonoBehaviour
         LastLeftPosition  = leftPos;
         LastRightPosition = rightPos;
 
-        // Console logging
         if (logToConsole)
-        {
             Debug.Log($"[Hand Position] T={elapsed:F2}s | Left:({leftPos.x:F3},{leftPos.y:F3},{leftPos.z:F3}) | Right:({rightPos.x:F3},{rightPos.y:F3},{rightPos.z:F3})");
-        }
 
-        // CSV logging
         if (logToCSV)
-        {
             WriteToCSV(elapsed, leftPos, rightPos);
-        }
     }
 
     private void InitializeCSVFile()
     {
         try
         {
-            // Create filename with cycle number (1-indexed for user readability)
             string cycleNumber = (currentCycle + 1).ToString();
             csvFilePath = TrialLogPath.GetFilePath($"Hand_Position_Cycle{cycleNumber}.csv");
             
-            // Ensure directory exists
             string directory = Path.GetDirectoryName(csvFilePath);
             if (!Directory.Exists(directory))
                 Directory.CreateDirectory(directory);
 
-            // Write header
             using (StreamWriter writer = new StreamWriter(csvFilePath, false))
-            {
                 writer.WriteLine("Time(s),LeftX,LeftY,LeftZ,RightX,RightY,RightZ");
-            }
         }
         catch (Exception ex)
         {
@@ -171,9 +163,7 @@ public class HandPositionLogger : MonoBehaviour
         try
         {
             using (StreamWriter writer = new StreamWriter(csvFilePath, true))
-            {
                 writer.WriteLine($"{elapsed:F3},{leftPos.x:F6},{leftPos.y:F6},{leftPos.z:F6},{rightPos.x:F6},{rightPos.y:F6},{rightPos.z:F6}");
-            }
         }
         catch (Exception ex)
         {
@@ -183,19 +173,15 @@ public class HandPositionLogger : MonoBehaviour
 
     public void SetLoggingInterval(float interval)
     {
-        loggingInterval = Mathf.Max(0.01f, interval); // Minimum 0.01s
+        loggingInterval = Mathf.Max(0.01f, interval);
     }
 
-    public string GetCSVFilePath()
-    {
-        return csvFilePath;
-    }
-    
+    public string GetCSVFilePath() => csvFilePath;
+
     private Transform FindHandByName(string handName)
     {
         Transform[] allTransforms = FindObjectsByType<Transform>();
         
-        // Search for exact match first
         foreach (Transform t in allTransforms)
         {
             if (t.name == handName)

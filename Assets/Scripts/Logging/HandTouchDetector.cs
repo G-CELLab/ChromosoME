@@ -114,14 +114,30 @@ public abstract class HandTouchDetector : MonoBehaviour
     {
         if (col == null) return int.MinValue;
 
-        // Nutrients win over larger organelle colliders
+        // Nutrients — highest priority
         if (col.CompareTag("Nutrient")) return 1000;
 
         string lower = col.name.ToLowerInvariant();
         if (lower.Contains("vitamin") || lower.Contains("protein") || lower.Contains("magnesium"))
             return 900;
 
+        // Wound — important gameplay interaction, beats environment objects
+        if (lower.Contains("wound")) return 800;
+
+        // CentrioleCopy must be checked before Centriole since "centriole"
+        // is a substring of "centriolecopy"
+        if (lower.Contains("centriolecopy") || lower.Contains("centriole_copy") || lower.Contains("centriole copy"))
+            return 700;
+
+        if (lower.Contains("centriole"))
+            return 600;
+
         if (lower.Contains("mitochond")) return 100;
+
+        // Ghost hand / intro objects — lowest deliberate priority so any
+        // real gameplay object always wins; also clears cleanly via
+        // MainLogger's phase-change flush
+        if (lower.Contains("ghost")) return -100;
 
         return 500;
     }
@@ -152,11 +168,29 @@ public abstract class HandTouchDetector : MonoBehaviour
             other.GetComponentInParent<RightHandTouching>() != null)
             return true;
 
+        // "Hand" name check must be specific — avoid filtering gameplay objects
+        // like WoundedHandT or WoundedHand that contain "Hand" as a substring.
+        // Only ignore actual XR hand controller objects by checking for known
+        // hand controller name patterns.
+        string otherNameLower = other.name.ToLowerInvariant();
+        bool isHandController = otherNameLower == "lefthand"
+                             || otherNameLower == "righthand"
+                             || otherNameLower.StartsWith("xrhand")
+                             || otherNameLower.StartsWith("hand_l")
+                             || otherNameLower.StartsWith("hand_r");
+
+        // Ignore the XR rig root and any of its named hierarchy objects
+        bool isXRRig = otherNameLower.Contains("xr origin")
+                    || otherNameLower.Contains("xr rig")
+                    || otherNameLower.Contains("xrorigin")
+                    || otherNameLower.Contains("xrrig");
+
         return other.name == "TopPlatform"
             || other.CompareTag("Left")
             || other.CompareTag("Right")
             || other.transform.root.CompareTag("Left")
             || other.transform.root.CompareTag("Right")
-            || other.name.Contains("Hand");
+            || isHandController
+            || isXRRig;
     }
 }

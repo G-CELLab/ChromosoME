@@ -31,6 +31,7 @@ public class ChromatidPoleDetector : MonoBehaviour, IPhaseController
     private ChromatidPoleDetector otherSide;
 
     // ── Lifecycle ─────────────────────────────────────────────────────────────
+
     private void Awake()
     {
         chromatidTag = side == Side.Left ? "Chromatid1" : "Chromatid2";
@@ -55,6 +56,7 @@ public class ChromatidPoleDetector : MonoBehaviour, IPhaseController
     private void OnDisable() => GameManager.Unregister(this);
 
     // ── IPhaseController ──────────────────────────────────────────────────────
+
     public void OnPhaseEnter(GameManager.GameState phase)
     {
         if (phase == GameManager.GameState.Anaphase)
@@ -64,8 +66,6 @@ public class ChromatidPoleDetector : MonoBehaviour, IPhaseController
             isCompleting = false;
             loadingCircle.Reset();
 
-            // Re-enable grab on the chromatid for this side
-            // Find it by tag since we know which tag this side uses
             var chromatids = GameObject.FindGameObjectsWithTag(chromatidTag);
             foreach (var c in chromatids)
             {
@@ -84,6 +84,7 @@ public class ChromatidPoleDetector : MonoBehaviour, IPhaseController
     }
 
     // ── Trigger Detection ─────────────────────────────────────────────────────
+
     private void OnTriggerStay(Collider other)
     {
         if (!isActive || success || isCompleting) return;
@@ -100,6 +101,7 @@ public class ChromatidPoleDetector : MonoBehaviour, IPhaseController
     }
 
     // ── Completion ────────────────────────────────────────────────────────────
+
     private void CompleteDetection(Collider chromatidCollider)
     {
         isCompleting = true;
@@ -108,6 +110,13 @@ public class ChromatidPoleDetector : MonoBehaviour, IPhaseController
         loadingCircle.Complete();
         if (checkedSprite != null)
             loadingCircle.SetSprite(checkedSprite);
+
+        // Resolve the chromatid's display name for logging
+        string chromatidName = ColliderNameResolver.ResolveName(chromatidCollider.transform);
+        string poleName      = side == Side.Left ? "LeftPole" : "RightPole";
+
+        MainLogger.LogOtherEvent($"Action:Dropped:{chromatidName}:{poleName}");
+        MainLogger.LogOtherEvent($"System:Chromatid:{side}Placed");
 
         var grab = chromatidCollider.GetComponent<XRGrabInteractable>();
         if (grab != null) grab.enabled = false;

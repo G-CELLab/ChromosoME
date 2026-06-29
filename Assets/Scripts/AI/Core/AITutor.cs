@@ -252,8 +252,13 @@ public class AITutor : MonoBehaviour
     private void OnTranscriptReceived(string transcript)
     {
         if (string.IsNullOrWhiteSpace(transcript)) return;
-        if (transcript.Trim().Length < 4) return; // filter single char/glyph noise
+        if (transcript.Trim().Length < 4) return;
+        
         Debug.Log($"[AITutor] Transcript received: {transcript}");
+        
+        // Log user speech before processing
+        MainLogger.LogUserSpeech(transcript);
+        
         ProcessUserQuery(transcript);
     }
 

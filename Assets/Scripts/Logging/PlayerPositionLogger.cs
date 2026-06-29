@@ -19,7 +19,7 @@ public class PlayerPositionLogger : MonoBehaviour
     
     [Header("Raycast Settings")]
     [SerializeField] private float raycastDistance = 100f;
-    [SerializeField] private LayerMask raycastLayerMask = -1; // All layers
+    [SerializeField] private LayerMask raycastLayerMask = -1;
     
     [Header("Logging Settings")]
     [SerializeField] private float loggingInterval = 0.1f;
@@ -39,6 +39,9 @@ public class PlayerPositionLogger : MonoBehaviour
     private int currentCycle = 0;
     private int lastCycle = -1;
 
+    // Phase tracking for Telophase-aware rollover
+    private string lastPhaseValue = "";
+
     // ── Cached last-frame values (read by CombinedLogger) ──────────────────────
 
     public Vector3 LastHeadPosition  { get; private set; }
@@ -47,9 +50,8 @@ public class PlayerPositionLogger : MonoBehaviour
     private void Start()
     {
         if (logToConsole)
-        {
             Debug.Log("[PlayerPositionLogger] START called");
-        }
+
         if (!hasGlobalSessionStartTime)
         {
             globalSessionStartTime = Time.time;
@@ -57,7 +59,6 @@ public class PlayerPositionLogger : MonoBehaviour
         }
         sessionStartTime = globalSessionStartTime;
 
-        // Auto-find player head if not assigned
         if (playerHeadTransform == null)
         {
             GameObject mainCameraObj = GameObject.FindGameObjectWithTag("MainCamera");
@@ -65,9 +66,7 @@ public class PlayerPositionLogger : MonoBehaviour
             {
                 playerHeadTransform = mainCameraObj.transform;
                 if (logToConsole)
-                {
                     Debug.Log("[PlayerPositionLogger] Auto-found Main Camera");
-                }
             }
             else
             {
@@ -77,7 +76,6 @@ public class PlayerPositionLogger : MonoBehaviour
             }
         }
 
-        // Setup initial CSV file path
         if (logToCSV)
         {
             currentCycle = GameManager.GetHealingCycleCount();
@@ -86,9 +84,7 @@ public class PlayerPositionLogger : MonoBehaviour
         }
 
         if (logToConsole)
-        {
             Debug.Log("[PlayerPositionLogger] Initialized. Logging to: " + csvFilePath);
-        }
     }
 
     private void OnDisable()
@@ -102,23 +98,29 @@ public class PlayerPositionLogger : MonoBehaviour
 
     private void Update()
     {
-        // Check if cycle changed and create new CSV file if needed
+        // Roll over to a new CSV when the phase transitions into Interphase
+        // after Telophase — NOT when healingCycleCount increments, because
+        // CellDivided() increments the counter in the same frame as the
+        // Telophase transition and would open a new file mid-Telophase.
         currentCycle = GameManager.GetHealingCycleCount();
-        if (currentCycle != lastCycle && currentCycle < GameManager.MAX_HEALING_CYCLES)
+        string currentPhase = GameManager.eGameStatus.ToString();
+        bool enteringNewCycle = lastPhaseValue == "Telophase"
+                             && currentPhase == "Interphase"
+                             && currentCycle != lastCycle
+                             && currentCycle < GameManager.MAX_HEALING_CYCLES;
+        if (enteringNewCycle)
         {
             lastCycle = currentCycle;
             if (logToCSV)
             {
                 InitializeCSVFile();
                 if (logToConsole)
-                {
                     Debug.Log($"[PlayerPositionLogger] Started new cycle {currentCycle + 1}");
-                }
             }
         }
-        
-        timeSinceLastLog += Time.deltaTime;
+        lastPhaseValue = currentPhase;
 
+        timeSinceLastLog += Time.deltaTime;
         if (timeSinceLastLog >= loggingInterval)
         {
             LogPositionFrame();
@@ -130,30 +132,18 @@ public class PlayerPositionLogger : MonoBehaviour
     {
         float elapsed = Time.time - sessionStartTime;
         
-        // Get player head position
         Vector3 headPos = playerHeadTransform.position;
-        float xPos = headPos.x;
-        float yPos = headPos.y;
-        float zPos = headPos.z;
-        
-        // Cast raycast forward from player head
         string raycastHit = GetRaycastTarget();
 
         // Cache for CombinedLogger
         LastHeadPosition  = headPos;
         LastRaycastTarget = raycastHit;
         
-        // Console logging
         if (logToConsole)
-        {
-            Debug.Log($"[PlayerPosLog] T={elapsed:F2}s | X:{xPos:F2} | Y:{yPos:F2} | Z:{zPos:F2} | Looking at:{raycastHit}");
-        }
+            Debug.Log($"[PlayerPosLog] T={elapsed:F2}s | X:{headPos.x:F2} | Y:{headPos.y:F2} | Z:{headPos.z:F2} | Looking at:{raycastHit}");
 
-        // CSV logging
         if (logToCSV)
-        {
-            WriteToCSV(elapsed, xPos, yPos, zPos, raycastHit);
-        }
+            WriteToCSV(elapsed, headPos.x, headPos.y, headPos.z, raycastHit);
     }
 
     private string GetRaycastTarget()
@@ -176,7 +166,6 @@ public class PlayerPositionLogger : MonoBehaviour
     {
         try
         {
-            // Create filename with cycle number (1-indexed for user readability)
             string cycleNumber = (currentCycle + 1).ToString();
             csvFilePath = TrialLogPath.GetFilePath($"Player_Position_Cycle{cycleNumber}.csv");
             
@@ -185,9 +174,7 @@ public class PlayerPositionLogger : MonoBehaviour
                 Directory.CreateDirectory(directory);
 
             using (StreamWriter writer = new StreamWriter(csvFilePath, false))
-            {
                 writer.WriteLine("Time(s),XPos,YPos,ZPos,Raycast");
-            }
         }
         catch (Exception ex)
         {
@@ -200,9 +187,7 @@ public class PlayerPositionLogger : MonoBehaviour
         try
         {
             using (StreamWriter writer = new StreamWriter(csvFilePath, true))
-            {
                 writer.WriteLine($"{elapsed:F3},{xPos:F3},{yPos:F3},{zPos:F3},{raycastHit}");
-            }
         }
         catch (Exception ex)
         {
@@ -210,8 +195,5 @@ public class PlayerPositionLogger : MonoBehaviour
         }
     }
 
-    public string GetCSVFilePath()
-    {
-        return csvFilePath;
-    }
+    public string GetCSVFilePath() => csvFilePath;
 }

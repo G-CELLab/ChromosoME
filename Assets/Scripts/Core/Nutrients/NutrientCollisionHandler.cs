@@ -1,12 +1,6 @@
 using UnityEngine;
 using UnityEngine.XR.Interaction.Toolkit.Interactables;
 
-/// <summary>
-/// Handles nutrient collection during Interphase.
-/// Player places a nutrient inside the Mitochondrion trigger zone.
-/// Each nutrient collects after 2 seconds of being inside the zone.
-/// Once all 3 are collected, triggers InterphasePart2.
-/// </summary>
 public class NutrientCollisionHandler : MonoBehaviour, IPhaseController
 {
     [Header("References")]
@@ -29,8 +23,6 @@ public class NutrientCollisionHandler : MonoBehaviour, IPhaseController
     private const float collectTime = 2f;
     private bool isActive = false;
 
-    // ── Lifecycle ─────────────────────────────────────────────────────────────
-
     private void OnEnable()
     {
         GameManager.Register(this);
@@ -45,11 +37,8 @@ public class NutrientCollisionHandler : MonoBehaviour, IPhaseController
             gameManager = Object.FindAnyObjectByType<GameManager>();
     }
 
-    // ── IPhaseController ──────────────────────────────────────────────────────
-
     public void OnPhaseEnter(GameManager.GameState phase)
     {
-        Debug.Log($"[NutrientCollisionHandler] OnPhaseEnter: {phase}");
         if (phase == GameManager.GameState.Interphase)
         {
             isActive = true;
@@ -63,8 +52,6 @@ public class NutrientCollisionHandler : MonoBehaviour, IPhaseController
             isActive = false;
     }
 
-    // ── Trigger Detection ─────────────────────────────────────────────────────
-
     private void OnTriggerStay(Collider other)
     {
         if (!isActive || interphasePart2Triggered) return;
@@ -75,10 +62,10 @@ public class NutrientCollisionHandler : MonoBehaviour, IPhaseController
             if (proteinTimer >= collectTime)
             {
                 proteinCollected = true;
+                MainLogger.LogOtherEvent("System:Nutrient:ProteinCollected");
                 gameManager?.NutrientCollision();
                 CancelSelectionBeforeDisable(protein);
                 protein.SetActive(false);
-                Debug.Log("[NutrientCollisionHandler] Protein collected.");
             }
         }
         else if (MatchesNutrient(other, magnesium, "magnesium") && !magnesiumCollected)
@@ -87,10 +74,10 @@ public class NutrientCollisionHandler : MonoBehaviour, IPhaseController
             if (magnesiumTimer >= collectTime)
             {
                 magnesiumCollected = true;
+                MainLogger.LogOtherEvent("System:Nutrient:MagnesiumCollected");
                 gameManager?.NutrientCollision();
                 CancelSelectionBeforeDisable(magnesium);
                 magnesium.SetActive(false);
-                Debug.Log("[NutrientCollisionHandler] Magnesium collected.");
             }
         }
         else if (MatchesNutrient(other, vitaminC, "vitamin") && !vitaminCCollected)
@@ -99,10 +86,10 @@ public class NutrientCollisionHandler : MonoBehaviour, IPhaseController
             if (vitaminCTimer >= collectTime)
             {
                 vitaminCCollected = true;
+                MainLogger.LogOtherEvent("System:Nutrient:VitaminCCollected");
                 gameManager?.NutrientCollision();
                 CancelSelectionBeforeDisable(vitaminC);
                 vitaminC.SetActive(false);
-                Debug.Log("[NutrientCollisionHandler] Vitamin C collected.");
             }
         }
     }
@@ -114,8 +101,6 @@ public class NutrientCollisionHandler : MonoBehaviour, IPhaseController
         if (MatchesNutrient(other, vitaminC,  "vitamin")   && !vitaminCCollected)  vitaminCTimer  = 0f;
     }
 
-    // ── Update ────────────────────────────────────────────────────────────────
-
     private void Update()
     {
         if (!isActive || interphasePart2Triggered) return;
@@ -124,11 +109,8 @@ public class NutrientCollisionHandler : MonoBehaviour, IPhaseController
         {
             interphasePart2Triggered = true;
             gameManager?.InterphasePart2();
-            Debug.Log("[NutrientCollisionHandler] All nutrients collected — InterphasePart2.");
         }
     }
-
-    // ── Helpers ───────────────────────────────────────────────────────────────
 
     private bool MatchesNutrient(Collider other, GameObject nutrient, string nutrientKey)
     {
@@ -142,21 +124,18 @@ public class NutrientCollisionHandler : MonoBehaviour, IPhaseController
             if (current.name.ToLowerInvariant().Contains(nutrientKey)) return true;
             current = current.parent;
         }
-
         return false;
     }
 
     private void CancelSelectionBeforeDisable(GameObject nutrient)
     {
         if (nutrient == null) return;
-
         var grab = nutrient.GetComponent<XRGrabInteractable>();
         if (grab == null) return;
-
         var manager = grab.interactionManager;
         if (manager == null) return;
-
-        manager.CancelInteractableSelection((UnityEngine.XR.Interaction.Toolkit.Interactables.IXRSelectInteractable)grab);
+        manager.CancelInteractableSelection(
+            (UnityEngine.XR.Interaction.Toolkit.Interactables.IXRSelectInteractable)grab);
     }
 
     private void ResetState()
@@ -168,24 +147,9 @@ public class NutrientCollisionHandler : MonoBehaviour, IPhaseController
         proteinTimer   = 0f;
         magnesiumTimer = 0f;
         vitaminCTimer  = 0f;
-        
-        // Re-enable nutrients for the new cycle
-        if (protein != null)
-        {
-            protein.SetActive(true);
-            Debug.Log("[NutrientCollisionHandler] Protein re-enabled.");
-        }
-        if (magnesium != null)
-        {
-            magnesium.SetActive(true);
-            Debug.Log("[NutrientCollisionHandler] Magnesium re-enabled.");
-        }
-        if (vitaminC != null)
-        {
-            vitaminC.SetActive(true);
-            Debug.Log("[NutrientCollisionHandler] Vitamin C re-enabled.");
-        }
-        
-        Debug.Log("[NutrientCollisionHandler] State reset for new Interphase.");
+
+        if (protein   != null) protein.SetActive(true);
+        if (magnesium != null) magnesium.SetActive(true);
+        if (vitaminC  != null) vitaminC.SetActive(true);
     }
 }

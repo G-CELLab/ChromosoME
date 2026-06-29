@@ -25,6 +25,7 @@ public class ChromosomeAlignmentDetector : MonoBehaviour, IPhaseController
     private bool isActive = false;
 
     // ── Lifecycle ─────────────────────────────────────────────────────────────
+
     private void Awake()
     {
         loadingCircle.Initialize();
@@ -34,6 +35,7 @@ public class ChromosomeAlignmentDetector : MonoBehaviour, IPhaseController
     private void OnDisable() => GameManager.Unregister(this);
 
     // ── IPhaseController ──────────────────────────────────────────────────────
+
     public void OnPhaseEnter(GameManager.GameState phase)
     {
         if (phase == GameManager.GameState.Metaphase)
@@ -59,6 +61,7 @@ public class ChromosomeAlignmentDetector : MonoBehaviour, IPhaseController
     }
 
     // ── Trigger Detection ─────────────────────────────────────────────────────
+
     private void OnTriggerStay(Collider other)
     {
         if (!isActive || alignmentSuccess) return;
@@ -68,7 +71,7 @@ public class ChromosomeAlignmentDetector : MonoBehaviour, IPhaseController
         loadingCircle.SetColor(new Color32(0, 255, 0, 155));
 
         if (loadingCircle.Tick(Time.deltaTime))
-            CompleteAlignment();
+            CompleteAlignment(other);
     }
 
     private void OnTriggerExit(Collider other)
@@ -78,15 +81,26 @@ public class ChromosomeAlignmentDetector : MonoBehaviour, IPhaseController
     }
 
     // ── Completion ────────────────────────────────────────────────────────────
-    private void CompleteAlignment()
+
+    private void CompleteAlignment(Collider chromosomeCollider)
     {
         alignmentSuccess = true;
         loadingCircle.SetVisible(false);
+
+        // Resolve the chromosome's display name for logging
+        string chromosomeName = ColliderNameResolver.ResolveName(chromosomeCollider.transform);
+        if (string.IsNullOrEmpty(chromosomeName))
+            chromosomeName = "Chromosome";
+
+        MainLogger.LogOtherEvent($"Action:Dropped:{chromosomeName}:MetaphaseCenter");
+        MainLogger.LogOtherEvent("System:Chromosome:Aligned");
+
         Debug.Log("[ChromosomeAlignmentDetector] Chromosome aligned — transitioning to Anaphase.");
         StartCoroutine(TransitionNextFrame());
     }
 
     // ── Coroutines ────────────────────────────────────────────────────────────
+
     private System.Collections.IEnumerator ActivateAfterDelay()
     {
         if (fairyDust != null) fairyDust.SetActive(false);

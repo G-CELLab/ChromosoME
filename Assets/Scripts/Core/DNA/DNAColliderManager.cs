@@ -11,6 +11,10 @@ public class DNAColliderManager : MonoBehaviour, IPhaseController
     public Vector3 condensedCenter = Vector3.zero;
     public Vector3 condensedSize   = new Vector3(0.3f, 0.3f, 0.3f);
 
+    [Header("Zone Registry")]
+    [Tooltip("Display name used in drop logs, e.g. 'RedDNA' or 'BlueDNA1'.")]
+    [SerializeField] private string zoneDisplayName = "DNA";
+
     private BoxCollider        box;
     private XRGrabInteractable grabInteractable;
 
@@ -19,12 +23,27 @@ public class DNAColliderManager : MonoBehaviour, IPhaseController
     void Awake()
     {
         grabInteractable = GetComponent<XRGrabInteractable>();
-
         box = GetComponent<BoxCollider>();
         if (box == null) box = gameObject.AddComponent<BoxCollider>();
-
         SetUncondensed();
         RegisterCollider();
+    }
+
+    private void Start()
+    {
+        // Register with PlacementZoneRegistry so DroppableObjectTracker can
+        // detect drops onto the DNA collider (e.g. incorrect placements).
+        // Done in Start rather than Awake so the registry singleton is ready.
+        if (PlacementZoneRegistry.Instance != null)
+            PlacementZoneRegistry.Instance.RegisterZone(box, zoneDisplayName);
+        else
+            Debug.LogWarning($"[DNAColliderManager] PlacementZoneRegistry not found — zone '{zoneDisplayName}' not registered.");
+    }
+
+    private void OnDestroy()
+    {
+        if (PlacementZoneRegistry.Instance != null)
+            PlacementZoneRegistry.Instance.UnregisterZone(box);
     }
 
     private void OnEnable()  => GameManager.Register(this);
