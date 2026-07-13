@@ -167,7 +167,7 @@ PlayerSettings:
   androidMaxAspectRatio: 2.1
   androidMinAspectRatio: 1
   applicationIdentifier:
-    Android: com.TaehyunKim.Biology_ChromosoME_Testing
+    Android: com.TaehyunKim.Biology_ChromosoME_Narration
   buildNumber:
     Standalone: 0
     VisionOS: 0
