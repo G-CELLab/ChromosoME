@@ -69,6 +69,16 @@ public class DroppableObjectTracker : MonoBehaviour
     {
         if (string.IsNullOrEmpty(heldObjectName)) return;
 
+        // FIX: capture the phase at the exact instant of release, before any
+        // other subscriber (e.g. a phase-transition controller reacting to
+        // this same drop) has a chance to advance GameManager.eGameStatus
+        // later in this same frame. Without this, a drop that itself causes
+        // the next phase transition gets logged under the NEW phase instead
+        // of the phase the action actually happened in — this was the cause
+        // of Metaphase drops showing up as "Anaphase" and Anaphase drops
+        // showing up as "Telophase" in the CSVs.
+        string phaseAtDrop = GameManager.eGameStatus.ToString();
+
         if (PlacementZoneRegistry.Instance == null)
         {
             Debug.LogWarning("[DroppableObjectTracker] PlacementZoneRegistry not found in scene.");
@@ -112,11 +122,13 @@ public class DroppableObjectTracker : MonoBehaviour
         string logEntry = $"Action:Dropped:{heldObjectName}:{zoneName}";
 
         if (logToConsole)
-            Debug.Log($"[DroppableObjectTracker] {logEntry}");
+            Debug.Log($"[DroppableObjectTracker] {logEntry} (phase at drop: {phaseAtDrop})");
 
         // Use immediate logging so the event is timestamped to the actual
-        // release frame rather than the next 0.1s log interval tick.
-        MainLogger.LogImmediateOtherEvent(logEntry);
+        // release frame rather than the next 0.1s log interval tick — and
+        // pass the phase captured at drop time so it isn't overwritten by
+        // a phase transition that this very drop may trigger.
+        MainLogger.LogImmediateOtherEvent(logEntry, phaseAtDrop);
     }
 
     // ── Helpers ───────────────────────────────────────────────────────────────

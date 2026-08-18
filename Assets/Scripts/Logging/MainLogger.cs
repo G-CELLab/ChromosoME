@@ -529,8 +529,17 @@ public class MainLogger : MonoBehaviour
     /// so the event is timestamped to the actual frame it occurred on rather than
     /// the next 0.1s log interval tick. Use for time-sensitive events like drop
     /// actions where the exact frame matters.
+    ///
+    /// FIX: accepts an optional <paramref name="phaseOverride"/> so callers that
+    /// capture the phase at the exact instant the event occurred (e.g.
+    /// DroppableObjectTracker, before its drop can itself trigger a phase
+    /// transition later in the same frame) can pass that captured value straight
+    /// through instead of relying on LastPhase, which is only refreshed once per
+    /// ~0.1s tick by MainLogger's own LogFrame() and can already reflect the
+    /// NEXT phase by the time this is called. When phaseOverride is null,
+    /// behavior is unchanged (falls back to LastPhase).
     /// </summary>
-    public static void LogImmediateOtherEvent(string eventName)
+    public static void LogImmediateOtherEvent(string eventName, string phaseOverride = null)
     {
         if (instance == null) return;
 
@@ -545,8 +554,11 @@ public class MainLogger : MonoBehaviour
 
         if (!instance.logToCSV) return;
 
-        // Write a dedicated row immediately with current gesture/touch/phase state
-        // so the timestamp reflects the actual drop frame.
+        string phaseToLog = phaseOverride ?? instance.LastPhase;
+
+        // Write a dedicated row immediately with current gesture/touch state
+        // (and the correct-at-the-time phase) so the timestamp reflects the
+        // actual drop frame.
         try
         {
             using (StreamWriter writer = new StreamWriter(instance.csvFilePath, true, new UTF8Encoding(true)))
@@ -557,7 +569,7 @@ public class MainLogger : MonoBehaviour
                     $"{EscapeCsvFieldStatic(instance.LastRightGesture)}," +
                     $"{EscapeCsvFieldStatic(instance.LastLeftTouch)}," +
                     $"{EscapeCsvFieldStatic(instance.LastRightTouch)}," +
-                    $"{EscapeCsvFieldStatic(instance.LastPhase)}," +
+                    $"{EscapeCsvFieldStatic(phaseToLog)}," +
                     $"," + // User_Speech — not applicable for immediate events
                     $"," + // AI_Speech   — not applicable for immediate events
                     $"," + // AI_Gesture  — not applicable for immediate events
