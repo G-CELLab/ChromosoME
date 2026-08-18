@@ -10,22 +10,13 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 6834597e7f8c9d945966ce6e63fa4937, type: 3}
-  m_Name: SplitDefinition
+  m_Name: SRG_Chromatid
   m_EditorClassIdentifier: Assembly-CSharp::GestureDefinition
-  gestureName: Splitting (Legacy)
-  animatorTriggerName: Splitting (Legacy)
+  gestureName: SRG_Chromatid
+  animatorTriggerName: SRG_Chromatid
   keywords:
-  - split
-  - into two
-  - pull each half
-  - two halves
-  - seperate
-  - opposite
-  - 'pull to '
-  - go to
-  - apart
-  - pulled apart
-  - pull apart
+  - half of the red
+  - chromatid on each
   timeScale: 1
   advanceSeconds: 0
   fallbackDelaySeconds: 2
