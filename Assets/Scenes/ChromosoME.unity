@@ -8459,13 +8459,21 @@ MonoBehaviour:
   ttsDriver: {fileID: 299343942}
   ttsPlayer: {fileID: 299343943}
   gestureDefinitions:
+  - {fileID: 11400000, guid: 4e4954db9a141014ba37578e9942cdc4, type: 2}
+  - {fileID: 11400000, guid: 3269c33f7e03c594f9d3507f92280b13, type: 2}
   - {fileID: 11400000, guid: 702e17ab024d9ec40a8204712012649c, type: 2}
   - {fileID: 11400000, guid: 26ca7422699cbdc47b08b5bd700d4a86, type: 2}
-  - {fileID: 11400000, guid: 3269c33f7e03c594f9d3507f92280b13, type: 2}
-  - {fileID: 11400000, guid: 48753907ecbe2f6459a543f7cd100f89, type: 2}
-  - {fileID: 11400000, guid: f8fd6e0c3cdfc9246845307a8f773809, type: 2}
+  - {fileID: 11400000, guid: 6b9dc431b471fe3419f22b67ce789a5b, type: 2}
+  - {fileID: 11400000, guid: e5a122a15ee0ed74b803e7852c14e623, type: 2}
+  - {fileID: 11400000, guid: 1102e460e4cd9e84ead8baba3344e6fc, type: 2}
+  - {fileID: 11400000, guid: db862857c07ce8c4da879d62f5be364a, type: 2}
+  - {fileID: 11400000, guid: 0ad48ec6dfca1704f9df82ce08b258ae, type: 2}
+  - {fileID: 11400000, guid: c40d2eb8a1717db4d801172ff2b6ee25, type: 2}
+  - {fileID: 11400000, guid: 6b54892ae88268849bd1e7c68928977e, type: 2}
+  - {fileID: 11400000, guid: 85d5a7da714c382418064b5a969cafe1, type: 2}
+  - {fileID: 11400000, guid: 23ecb9b086e87e04b887006cf9117c89, type: 2}
+  - {fileID: 11400000, guid: b4aaaf07e0985af429db4552899503f8, type: 2}
   - {fileID: 11400000, guid: 60fe50eb43748794d8e6ae7f210212cf, type: 2}
-  - {fileID: 11400000, guid: 4e4954db9a141014ba37578e9942cdc4, type: 2}
   charactersPerSecond: 15.3
   maxGestureDelaySec: 35
   maxWaitForAudioStartSec: 6
@@ -48433,7 +48441,7 @@ PrefabInstance:
         type: 3}
       propertyPath: aiTutor
       value: 
-      objectReference: {fileID: 0}
+      objectReference: {fileID: 299343946}
     - target: {fileID: 562977098698051847, guid: acb5e3d7873047647a45e0c3d003313c,
         type: 3}
       propertyPath: ttsPlayer
