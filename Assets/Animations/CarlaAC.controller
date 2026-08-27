@@ -500,7 +500,7 @@ AnimatorState:
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_Name: SRG_Capsule-Shaped Nutrient
-  m_Speed: 1
+  m_Speed: 1.5
   m_CycleOffset: 0
   m_Transitions:
   - {fileID: 7652007434845671552}
@@ -529,7 +529,7 @@ AnimatorState:
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_Name: Talking
-  m_Speed: 0.5
+  m_Speed: 1
   m_CycleOffset: 0
   m_Transitions:
   - {fileID: -4248065240153995559}
@@ -557,7 +557,7 @@ AnimatorState:
   m_MirrorParameterActive: 0
   m_CycleOffsetParameterActive: 0
   m_TimeParameterActive: 0
-  m_Motion: {fileID: -203655887218126122, guid: 6b63f0a1b11dacf48b629a470099569e,
+  m_Motion: {fileID: -623603649343465320, guid: bb165ba773fbac14db9cacd6cf337440,
     type: 3}
   m_Tag: 
   m_SpeedParameter: 
@@ -844,7 +844,7 @@ AnimatorState:
   m_MirrorParameterActive: 0
   m_CycleOffsetParameterActive: 0
   m_TimeParameterActive: 0
-  m_Motion: {fileID: -203655887218126122, guid: 695b5bf65905c0549bf66e7eb9f18f32,
+  m_Motion: {fileID: -623603649343465320, guid: 4dcec87e19ce148498bb1eb25f0dc014,
     type: 3}
   m_Tag: 
   m_SpeedParameter: 
@@ -1405,7 +1405,7 @@ AnimatorState:
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_Name: PRG_Consuming Nutrients & Generating Energy
-  m_Speed: 1
+  m_Speed: 1.5
   m_CycleOffset: 0
   m_Transitions:
   - {fileID: 2344638779031250164}
@@ -2526,7 +2526,7 @@ AnimatorState:
   m_MirrorParameterActive: 0
   m_CycleOffsetParameterActive: 0
   m_TimeParameterActive: 0
-  m_Motion: {fileID: -203655887218126122, guid: 1f1e18921f7dc0d4aa2a2fa8aa87864e,
+  m_Motion: {fileID: -623603649343465320, guid: f48f20dc476c6b74a9b14d53f1e192f6,
     type: 3}
   m_Tag: 
   m_SpeedParameter: 

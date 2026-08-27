@@ -112,11 +112,34 @@ public class GestureSynchronizer : MonoBehaviour
     /// Safe to call repeatedly as tokens stream in.
     /// Returns true if a gesture was scheduled this call.
     /// </summary>
+    /// <summary>
+    /// One candidate gesture match found during a ProcessResponse scan, before
+    /// the cooldown gate is applied.
+    /// </summary>
+    private struct GestureMatch
+    {
+        public GestureDefinition def;
+        public string keyword;
+        public int keywordIndex;
+        public float delay;
+        public float estimatedFireTime;
+    }
+
     public bool ProcessResponse(string accumulatedText)
     {
         if (string.IsNullOrWhiteSpace(accumulatedText)) return false;
 
         string normalized = NormalizeText(accumulatedText);
+        float  now        = Time.realtimeSinceStartup;
+
+        // ── Pass 1: collect every keyword match, regardless of gestureDefinitions
+        // list order. The list order has no relationship to where each keyword
+        // actually sits in the spoken text, so scheduling gestures in list order
+        // (as the old implementation did) could schedule a LATER-in-the-list
+        // gesture before an EARLIER-in-the-text one, making the "last fire time"
+        // used for the cooldown compare reflect scan order instead of speech
+        // order — that's what produced negative cooldown deltas.
+        var matches = new List<GestureMatch>();
 
         foreach (GestureDefinition def in gestureDefinitions)
         {
@@ -132,36 +155,56 @@ public class GestureSynchronizer : MonoBehaviour
                 // Already scheduled this keyword this response — skip silently
                 if (_scheduledKeywordsThisResponse.Contains(keyword)) continue;
 
-                // Calculate when this gesture would actually fire in real time
                 float delay             = CalculateDelay(normalized, keywordIndex, def);
-                float estimatedFireTime = Time.realtimeSinceStartup + delay;
+                float estimatedFireTime = now + delay;
 
-                // Cooldown: compare estimated fire times, not queue times
-                float timeSinceLastFire = estimatedFireTime - _lastGestureFireTime;
-                if (timeSinceLastFire < gestureCooldownSec)
+                matches.Add(new GestureMatch
                 {
-                    if (verboseDebug)
-                        Debug.Log($"[GestureSynchronizer] ⏳ '{def.gestureName}' skipped — " +
-                                  $"estimated fire is only {timeSinceLastFire:F2}s after last gesture " +
-                                  $"(cooldown: {gestureCooldownSec:F1}s).");
-                    continue;
-                }
+                    def                = def,
+                    keyword            = keyword,
+                    keywordIndex       = keywordIndex,
+                    delay              = delay,
+                    estimatedFireTime  = estimatedFireTime
+                });
 
-                // Good to go — mark keyword, store fire time, and schedule
-                _scheduledKeywordsThisResponse.Add(keyword);
-                _lastGestureFireTime = estimatedFireTime;
-                StartCoroutine(TriggerAfterDelay(def, keyword, delay));
-
-                if (verboseDebug)
-                    Debug.Log($"[GestureSynchronizer] {def.logEmoji} Matched '{keyword}' " +
-                              $"for gesture '{def.gestureName}' — scheduled in {delay:F2}s " +
-                              $"(estimated fire at +{delay:F2}s)");
-
-                break;
+                break; // first matching keyword per definition, same as before
             }
         }
 
-        return false;
+        if (matches.Count == 0) return false;
+
+        // ── Pass 2: sort by estimated fire time — i.e. speech-chronological
+        // order — so the cooldown gate always compares against the gesture
+        // that will genuinely fire immediately before it, not whatever
+        // happened to be scanned first.
+        matches.Sort((a, b) => a.estimatedFireTime.CompareTo(b.estimatedFireTime));
+
+        bool scheduledAny = false;
+
+        foreach (GestureMatch match in matches)
+        {
+            float timeSinceLastFire = match.estimatedFireTime - _lastGestureFireTime;
+            if (timeSinceLastFire < gestureCooldownSec)
+            {
+                if (verboseDebug)
+                    Debug.Log($"[GestureSynchronizer] ⏳ '{match.def.gestureName}' skipped — " +
+                              $"estimated fire is only {timeSinceLastFire:F2}s after last gesture " +
+                              $"(cooldown: {gestureCooldownSec:F1}s).");
+                continue;
+            }
+
+            _scheduledKeywordsThisResponse.Add(match.keyword);
+            _lastGestureFireTime = match.estimatedFireTime;
+            StartCoroutine(TriggerAfterDelay(match.def, match.keyword, match.delay));
+            scheduledAny = true;
+
+            if (verboseDebug)
+                Debug.Log($"[GestureSynchronizer] {match.def.logEmoji} Matched '{match.keyword}' " +
+                          $"for gesture '{match.def.gestureName}' — scheduled in {match.delay:F2}s " +
+                          $"(estimated fire at +{match.delay:F2}s)");
+        }
+
+        return scheduledAny;
     }
 
     /// <summary>

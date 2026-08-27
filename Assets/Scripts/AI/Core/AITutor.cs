@@ -78,6 +78,38 @@ public class AITutor : MonoBehaviour
 
     private readonly Dictionary<string, AudioClip> _narrationCache = new Dictionary<string, AudioClip>();
 
+    // ── Narration prefetch-ahead ──────────────────────────────────────────────
+    // Fixed, known playback order of the scripted narration lines (mirrors the
+    // sequence GameManager actually triggers them in). Used only to figure out
+    // which single line comes "next" so we can prefetch just that one instead
+    // of every line at scene start.
+    private static readonly string[] _narrationSequence =
+    {
+        NarrationLines.Intro,
+        NarrationLines.Interphase,
+        NarrationLines.InterphasePart2,
+        NarrationLines.Prophase,
+        NarrationLines.Metaphase,
+        NarrationLines.Anaphase,
+        NarrationLines.Telophase[0],
+        NarrationLines.Telophase[1],
+        NarrationLines.Telophase[2]
+    };
+
+    private static readonly Dictionary<string, int> _narrationOrderIndex = BuildNarrationOrderIndex();
+
+    private static Dictionary<string, int> BuildNarrationOrderIndex()
+    {
+        var map = new Dictionary<string, int>();
+        for (int i = 0; i < _narrationSequence.Length; i++)
+            map[_narrationSequence[i]] = i;
+        return map;
+    }
+
+    // Guards against kicking off the same prefetch twice (e.g. if a line
+    // somehow starts playing again before the next one has been consumed).
+    private readonly HashSet<string> _narrationPrefetchStarted = new HashSet<string>();
+
     private bool  _isProcessing   = false;
     private bool  _isNarrating    = false;  // true only during narration — blocks all interrupts
     private bool  _interrupted    = false;
@@ -106,7 +138,12 @@ public class AITutor : MonoBehaviour
 
         BuildRAGIndex();
         StartCoroutine(WarmUpOnStart());
-        StartCoroutine(PrefetchAllNarrations());
+
+        // Only prefetch the very first narration line (Intro) so it's ready
+        // with zero delay. Every subsequent line is prefetched one step
+        // ahead, right as the previous one starts playing — see
+        // PrefetchNextNarrationInSequence().
+        StartCoroutine(PrefetchNarrationLine(_narrationSequence[0]));
     }
 
     private void OnEnable()
@@ -299,6 +336,11 @@ public class AITutor : MonoBehaviour
         speechRecognizer?.NotifyTTSStarted();
 
         Debug.Log($"[AITutor] 📢 Narration: {text}");
+
+        // One-step-ahead prefetch: as soon as this scripted line starts,
+        // start fetching whatever comes next in the known sequence so it's
+        // ready by the time it's needed, without front-loading every clip.
+        PrefetchNextNarrationInSequence(text);
 
         if (!_interrupted)
         {
@@ -608,30 +650,39 @@ public class AITutor : MonoBehaviour
         yield return _generator.WarmUp();
     }
 
-    private IEnumerator PrefetchAllNarrations()
+    /// <summary>
+    /// Fetches a single narration line's audio clip into the cache.
+    /// No-ops if the clip is already cached or already being fetched, so
+    /// it's safe to call speculatively.
+    /// </summary>
+    private IEnumerator PrefetchNarrationLine(string line)
     {
-        string[] lines = new[]
-        {
-            NarrationLines.Intro,
-            NarrationLines.Interphase,
-            NarrationLines.InterphasePart2,
-            NarrationLines.Prophase,
-            NarrationLines.Metaphase,
-            NarrationLines.Anaphase,
-            NarrationLines.Telophase[0],
-            NarrationLines.Telophase[1],
-            NarrationLines.Telophase[2]
-        };
+        if (string.IsNullOrEmpty(line)) yield break;
+        if (_narrationCache.ContainsKey(line)) yield break;
+        if (!_narrationPrefetchStarted.Add(line)) yield break; // already in flight
 
-        foreach (string line in lines)
+        yield return ttsPlayer.FetchAudioClip(line, clip =>
         {
-            yield return ttsPlayer.FetchAudioClip(line, clip =>
-            {
-                if (clip != null) _narrationCache[line] = clip;
-            });
-            Debug.Log($"[AITutor] Prefetched narration: {line.Substring(0, Mathf.Min(40, line.Length))}...");
-        }
+            if (clip != null) _narrationCache[line] = clip;
+        });
 
-        Debug.Log("[AITutor] All narrations prefetched.");
+        Debug.Log($"[AITutor] Prefetched narration: {line.Substring(0, Mathf.Min(40, line.Length))}...");
+    }
+
+    /// <summary>
+    /// Given the line that just started playing, looks up its position in
+    /// the known narration sequence and kicks off a prefetch for whatever
+    /// comes immediately after it. Lines outside the known sequence (e.g.
+    /// arbitrary future SpeakNarration calls) are simply ignored — nothing
+    /// to look ahead to.
+    /// </summary>
+    private void PrefetchNextNarrationInSequence(string justStartedLine)
+    {
+        if (!_narrationOrderIndex.TryGetValue(justStartedLine, out int index)) return;
+
+        int nextIndex = index + 1;
+        if (nextIndex >= _narrationSequence.Length) return;
+
+        StartCoroutine(PrefetchNarrationLine(_narrationSequence[nextIndex]));
     }
 }
