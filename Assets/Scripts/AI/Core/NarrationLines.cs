@@ -41,7 +41,7 @@ public static class NarrationLines
 
     public static readonly string Metaphase =
         "This is Metaphase, where all the chromosomes line up along the center of the cell so they can be " +
-        "evenly divided. Grab the red X-shaped chromosome and move it to the sparkly area in the middle " +
+        "evenly divided. Grab the red X-shaped chromosome and move it to the sparkly area in the middle of the cell " +
         "to align it with the other chromosomes. Each new cell must receive one complete copy of every chromosome!";
 
     public static readonly string Anaphase =

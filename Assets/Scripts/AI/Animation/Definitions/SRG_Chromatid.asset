@@ -17,6 +17,7 @@ MonoBehaviour:
   keywords:
   - half of the red
   - chromatid on each
+  - a chromatid
   timeScale: 1
   advanceSeconds: 0
   fallbackDelaySeconds: 2

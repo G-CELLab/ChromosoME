@@ -46,7 +46,7 @@ public class GestureSynchronizer : MonoBehaviour
     [Header("Gesture Cooldown")]
     [Tooltip("Minimum seconds between gesture fire times. Compared against estimated playback " +
              "positions, not queue time, so gestures in the same response are spaced correctly.")]
-    public float gestureCooldownSec = 3f;
+    public float gestureCooldownSec = 2.5f;
 
     [Header("Debug")]
     public bool verboseDebug = true;

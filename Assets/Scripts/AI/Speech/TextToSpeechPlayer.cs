@@ -17,10 +17,13 @@ public class TextToSpeechPlayer : MonoBehaviour
     public string ttsModel  = "gpt-4o-mini-tts";
     public string voice     = "nova";
 
+    
+
     [TextArea(3, 6)]
     public string ttsInstructions = "Speak in a warm, friendly, consistent tone. " +
                                     "Maintain a moderate and steady pitch throughout. " +
-                                    "Keep energy level calm and even. ";
+                                    "Keep energy level calm and even. " +
+                                    "Speak slightly slower than normal, with natural pauses between sentences. ";
 
     [Header("Audio")]
     public AudioSource audioSource;
